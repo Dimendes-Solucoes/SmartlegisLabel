@@ -42,7 +42,7 @@
       <h3 class="text-lg font-bold text-gray-900 mb-4">
         79ª Sessão Ordinária da 1ª Sessão Legislativa da 20ª Legislatura
       </h3>
-      
+
       <div class="grid grid-cols-2 gap-6 mb-4">
         <div class="flex items-center gap-3">
           <div class="w-12 h-12 flex items-center justify-center rounded-lg" style="background-color: rgba(0, 122, 184, 0.1);">
@@ -55,7 +55,7 @@
             <p class="text-sm text-gray-900">17 de Dezembro de 2025 (Quarta-feira) - 09h00</p>
           </div>
         </div>
-        
+
         <div class="flex items-center gap-3">
           <div>
             <p class="text-sm font-medium text-gray-700">Encerramento</p>
@@ -106,7 +106,7 @@
               <h3 class="text-lg font-bold text-gray-900 mb-2">
                 Matéria - {{ materia.titulo }}
               </h3>
-              
+
               <div class="flex items-center gap-6 text-sm">
                 <div>
                   <span class="text-gray-600">Total de votos</span>
@@ -130,8 +130,8 @@
                 </div>
               </div>
             </div>
-            
-            <div 
+
+            <div
               class="px-6 py-3 rounded-lg font-bold text-white"
               :style="{ backgroundColor: materia.resultado === 'Reprovado' ? '#EF4444' : '#10B981' }"
             >
@@ -163,21 +163,21 @@
                 </span>
               </div>
               <div class="col-span-3">
-                <span 
+                <span
                   v-if="voto.voto === 'Favor'"
                   class="inline-flex px-3 py-1 rounded-full text-xs font-medium text-white"
                   style="background-color: #10B981;"
                 >
                   Favor
                 </span>
-                <span 
+                <span
                   v-else-if="voto.voto === 'Abstenção'"
                   class="inline-flex px-3 py-1 rounded-full text-xs font-medium text-gray-700"
                   style="background-color: #E5E7EB;"
                 >
                   Abstenção
                 </span>
-                <span 
+                <span
                   v-else
                   class="inline-flex px-3 py-1 rounded-full text-xs font-medium text-white"
                   style="background-color: #EF4444;"

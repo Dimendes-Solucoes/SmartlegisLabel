@@ -26,10 +26,8 @@
 <script setup>
 import { useTenant } from '@/composables/useTenant'
 
-// Obtém informações do tenant
 const { tenantName, tenantFullName, brasao } = useTenant()
 
-// Props opcionais para sobrescrever os valores do tenant se necessário
 const props = defineProps({
   title: {
     type: String,
@@ -41,6 +39,5 @@ const props = defineProps({
   }
 })
 
-// Usa o título do tenant se não for fornecido via prop
 const title = props.title || tenantFullName.value
 </script>

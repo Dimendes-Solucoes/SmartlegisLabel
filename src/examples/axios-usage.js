@@ -1,24 +1,5 @@
 import api from '@/config/axios'
 
-/**
- * EXEMPLOS DE USO DO AXIOS CONFIGURADO
- * 
- * O Axios já está configurado para:
- * - Usar automaticamente a URL da API do tenant atual
- * - Adicionar token de autenticação automaticamente
- * - Tratar erros comuns
- * - Retornar apenas os dados (sem o envelope do Axios)
- */
-
-/**
- * ========================================
- * EXEMPLOS BÁSICOS
- * ========================================
- */
-
-/**
- * EXEMPLO 1: GET simples
- */
 export async function getUsers() {
   try {
     const users = await api.get('/users')
@@ -29,9 +10,6 @@ export async function getUsers() {
   }
 }
 
-/**
- * EXEMPLO 2: GET com parâmetros de query
- */
 export async function getUsersPaginated(page = 1, limit = 10) {
   try {
     const data = await api.get('/users', {
@@ -44,9 +22,6 @@ export async function getUsersPaginated(page = 1, limit = 10) {
   }
 }
 
-/**
- * EXEMPLO 3: GET por ID
- */
 export async function getUserById(id) {
   try {
     const user = await api.get(`/users/${id}`)
@@ -57,9 +32,6 @@ export async function getUserById(id) {
   }
 }
 
-/**
- * EXEMPLO 4: POST - Criar recurso
- */
 export async function createUser(userData) {
   try {
     const newUser = await api.post('/users', {
@@ -74,9 +46,6 @@ export async function createUser(userData) {
   }
 }
 
-/**
- * EXEMPLO 5: PUT - Atualizar recurso completo
- */
 export async function updateUser(id, userData) {
   try {
     const updated = await api.put(`/users/${id}`, userData)
@@ -87,9 +56,6 @@ export async function updateUser(id, userData) {
   }
 }
 
-/**
- * EXEMPLO 6: PATCH - Atualizar parcialmente
- */
 export async function patchUser(id, partialData) {
   try {
     const updated = await api.patch(`/users/${id}`, partialData)
@@ -100,9 +66,6 @@ export async function patchUser(id, partialData) {
   }
 }
 
-/**
- * EXEMPLO 7: DELETE
- */
 export async function deleteUser(id) {
   try {
     await api.delete(`/users/${id}`)
@@ -113,21 +76,12 @@ export async function deleteUser(id) {
   }
 }
 
-/**
- * ========================================
- * EXEMPLOS AVANÇADOS
- * ========================================
- */
-
-/**
- * EXEMPLO 8: Upload de arquivo único
- */
 export async function uploadAvatar(userId, file) {
   try {
     const formData = new FormData()
     formData.append('avatar', file)
     formData.append('userId', userId)
-    
+
     const result = await api.post(`/users/${userId}/avatar`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data'
@@ -140,17 +94,14 @@ export async function uploadAvatar(userId, file) {
   }
 }
 
-/**
- * EXEMPLO 9: Upload múltiplo com progresso
- */
 export async function uploadDocuments(files, onProgress) {
   try {
     const formData = new FormData()
-    
+
     files.forEach((file, index) => {
       formData.append(`documents[${index}]`, file)
     })
-    
+
     const result = await api.post('/documents', formData, {
       headers: {
         'Content-Type': 'multipart/form-data'
@@ -162,7 +113,7 @@ export async function uploadDocuments(files, onProgress) {
         onProgress?.(percentCompleted)
       }
     })
-    
+
     return result
   } catch (error) {
     console.error('Erro ao fazer upload:', error)
@@ -170,16 +121,12 @@ export async function uploadDocuments(files, onProgress) {
   }
 }
 
-/**
- * EXEMPLO 10: Download de arquivo
- */
 export async function downloadFile(fileId, filename) {
   try {
     const response = await api.get(`/files/${fileId}/download`, {
       responseType: 'blob'
     })
-    
-    // Criar link para download
+
     const url = window.URL.createObjectURL(new Blob([response]))
     const link = document.createElement('a')
     link.href = url
@@ -188,7 +135,7 @@ export async function downloadFile(fileId, filename) {
     link.click()
     link.remove()
     window.URL.revokeObjectURL(url)
-    
+
     return true
   } catch (error) {
     console.error('Erro ao baixar arquivo:', error)
@@ -196,13 +143,10 @@ export async function downloadFile(fileId, filename) {
   }
 }
 
-/**
- * EXEMPLO 11: Requisição com timeout customizado
- */
 export async function getLargeReport(reportId) {
   try {
     const report = await api.get(`/reports/${reportId}`, {
-      timeout: 60000 // 60 segundos
+      timeout: 60000
     })
     return report
   } catch (error) {
@@ -211,9 +155,6 @@ export async function getLargeReport(reportId) {
   }
 }
 
-/**
- * EXEMPLO 12: Requisição com headers customizados
- */
 export async function exportData(format = 'csv') {
   try {
     const data = await api.get('/export', {
@@ -229,14 +170,11 @@ export async function exportData(format = 'csv') {
   }
 }
 
-/**
- * EXEMPLO 13: Requisição com retry automático (usando interceptor)
- */
 export async function getCriticalData() {
   try {
     const data = await api.get('/critical-data', {
-      retry: 3, // Tentar 3 vezes antes de falhar
-      retryDelay: 1000, // Aguardar 1s entre tentativas
+      retry: 3,
+      retryDelay: 1000,
     })
     return data
   } catch (error) {
@@ -245,18 +183,9 @@ export async function getCriticalData() {
   }
 }
 
-/**
- * ========================================
- * COMPOSABLES PARA USO EM COMPONENTES VUE
- * ========================================
- */
-
-/**
- * EXEMPLO 14: Composable com estado de loading e erro
- */
 export function useUsers() {
   const { ref } = require('vue')
-  
+
   const users = ref([])
   const loading = ref(false)
   const error = ref(null)
@@ -264,7 +193,7 @@ export function useUsers() {
   const fetchUsers = async () => {
     loading.value = true
     error.value = null
-    
+
     try {
       users.value = await api.get('/users')
     } catch (err) {
@@ -278,7 +207,7 @@ export function useUsers() {
   const createUser = async (userData) => {
     loading.value = true
     error.value = null
-    
+
     try {
       const newUser = await api.post('/users', userData)
       users.value.push(newUser)
@@ -300,54 +229,28 @@ export function useUsers() {
   }
 }
 
-/**
- * ========================================
- * SERVICES (CLASSES)
- * ========================================
- */
-
-/**
- * EXEMPLO 15: Service de Matérias Legislativas
- */
 export class MateriasService {
-  /**
-   * Lista todas as matérias com filtros opcionais
-   */
+
   async listar(filtros = {}) {
     return await api.get('/materias', { params: filtros })
   }
 
-  /**
-   * Busca matéria por ID
-   */
   async buscarPorId(id) {
     return await api.get(`/materias/${id}`)
   }
 
-  /**
-   * Cria nova matéria
-   */
   async criar(dados) {
     return await api.post('/materias', dados)
   }
 
-  /**
-   * Atualiza matéria existente
-   */
   async atualizar(id, dados) {
     return await api.put(`/materias/${id}`, dados)
   }
 
-  /**
-   * Remove matéria
-   */
   async deletar(id) {
     return await api.delete(`/materias/${id}`)
   }
 
-  /**
-   * Busca com paginação
-   */
   async buscarPaginado({ page = 1, limit = 10, search = '', tipo = '' }) {
     return await api.get('/materias', {
       params: {
@@ -359,14 +262,11 @@ export class MateriasService {
     })
   }
 
-  /**
-   * Anexar documento à matéria
-   */
   async anexarDocumento(materiaId, arquivo, descricao = '') {
     const formData = new FormData()
     formData.append('documento', arquivo)
     formData.append('descricao', descricao)
-    
+
     return await api.post(
       `/materias/${materiaId}/documentos`,
       formData,
@@ -376,23 +276,16 @@ export class MateriasService {
     )
   }
 
-  /**
-   * Listar documentos da matéria
-   */
   async listarDocumentos(materiaId) {
     return await api.get(`/materias/${materiaId}/documentos`)
   }
 
-  /**
-   * Baixar documento
-   */
   async baixarDocumento(materiaId, documentoId, nomeArquivo) {
     const response = await api.get(
       `/materias/${materiaId}/documentos/${documentoId}/download`,
       { responseType: 'blob' }
     )
-    
-    // Criar link para download
+
     const url = window.URL.createObjectURL(new Blob([response]))
     const link = document.createElement('a')
     link.href = url
@@ -404,9 +297,6 @@ export class MateriasService {
   }
 }
 
-/**
- * EXEMPLO 16: Service de Parlamentares
- */
 export class ParlamentaresService {
   async listar() {
     return await api.get('/parlamentares')
@@ -431,7 +321,7 @@ export class ParlamentaresService {
   async uploadFoto(id, foto) {
     const formData = new FormData()
     formData.append('foto', foto)
-    
+
     return await api.post(
       `/parlamentares/${id}/foto`,
       formData,
@@ -442,9 +332,6 @@ export class ParlamentaresService {
   }
 }
 
-/**
- * EXEMPLO 17: Service de Sessões
- */
 export class SessoesService {
   async listar(filtros = {}) {
     return await api.get('/sessoes', { params: filtros })
@@ -482,7 +369,6 @@ export class SessoesService {
   }
 }
 
-// Exportar instâncias dos services
 export const materiasService = new MateriasService()
 export const parlamentaresService = new ParlamentaresService()
 export const sessoesService = new SessoesService()

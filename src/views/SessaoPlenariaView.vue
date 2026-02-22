@@ -125,7 +125,7 @@
         <h3 class="text-lg font-bold text-gray-900 mb-4">
           {{ sessao.name }}
         </h3>
-        
+
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-3">
             <div class="w-12 h-12 flex items-center justify-center rounded-lg" style="background-color: rgba(0, 122, 184, 0.1);">
@@ -149,9 +149,9 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
               </svg>
             </button>
-            <button 
+            <button
               @click.stop="goToVotacao(sessao.id)"
-              class="px-4 py-2 rounded-lg text-sm font-medium bg-white border hover:bg-gray-50 transition-colors flex items-center gap-2" 
+              class="px-4 py-2 rounded-lg text-sm font-medium bg-white border hover:bg-gray-50 transition-colors flex items-center gap-2"
               style="color: #007AB8; border-color: #007AB8;"
             >
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -206,9 +206,9 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
           </svg>
         </button>
-        
+
         <!-- Anterior -->
-        <button 
+        <button
           @click="previousPage"
           :disabled="pagination.currentPage === 1"
           :class="[
@@ -220,7 +220,7 @@
         >
           Anterior
         </button>
-        
+
         <!-- Números das páginas -->
         <button
           v-for="page in visiblePages"
@@ -236,10 +236,10 @@
         >
           {{ page }}
         </button>
-        
+
         <!-- Reticências se necessário -->
         <span v-if="showEllipsis" class="px-3 py-2 text-gray-500">...</span>
-        
+
         <!-- Última página (se não estiver visível) -->
         <button
           v-if="shouldShowLastPage"
@@ -248,9 +248,9 @@
         >
           {{ pagination.lastPage }}
         </button>
-        
+
         <!-- Próximo -->
-        <button 
+        <button
           @click="nextPage"
           :disabled="pagination.currentPage === pagination.lastPage"
           :class="[
@@ -262,7 +262,7 @@
         >
           Próximo
         </button>
-        
+
         <!-- Última página -->
         <button
           @click="goToPage(pagination.lastPage)"
@@ -315,46 +315,40 @@ const endItem = computed(() => {
   return end > pagination.value.total ? pagination.value.total : end
 })
 
-// Calcula as páginas visíveis (atual + até 3 para frente)
 const visiblePages = computed(() => {
   const pages = []
   const current = pagination.value.currentPage
   const last = pagination.value.lastPage
-  
-  // Adiciona página atual
+
   pages.push(current)
-  
-  // Adiciona até 3 páginas para frente
+
   for (let i = 1; i <= 3 && current + i <= last; i++) {
     pages.push(current + i)
   }
-  
+
   return pages
 })
 
-// Verifica se deve mostrar reticências
 const showEllipsis = computed(() => {
   const lastVisible = visiblePages.value[visiblePages.value.length - 1]
   return lastVisible < pagination.value.lastPage - 1
 })
 
-// Verifica se deve mostrar botão da última página separado
 const shouldShowLastPage = computed(() => {
   const lastVisible = visiblePages.value[visiblePages.value.length - 1]
   return lastVisible < pagination.value.lastPage
 })
 
-// Gera lista de anos de 2000 a 2030
 const years = computed(() => {
   const currentYear = new Date().getFullYear()
   const startYear = 2000
-  const endYear = currentYear + 5 // 5 anos no futuro
+  const endYear = currentYear + 5
   const yearList = []
-  
+
   for (let year = endYear; year >= startYear; year--) {
     yearList.push(year)
   }
-  
+
   return yearList
 })
 
@@ -368,26 +362,26 @@ onMounted(() => {
 
 const formatDateTimeExtended = (dateTimeString) => {
   if (!dateTimeString) return 'Data não informada'
-  
+
   const meses = [
     'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
     'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
   ]
-  
+
   const diasSemana = [
     'Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira',
     'Quinta-feira', 'Sexta-feira', 'Sábado'
   ]
-  
+
   const data = new Date(dateTimeString)
-  
+
   const dia = data.getDate()
   const mes = meses[data.getMonth()]
   const ano = data.getFullYear()
   const diaSemana = diasSemana[data.getDay()]
   const horas = String(data.getHours()).padStart(2, '0')
   const minutos = String(data.getMinutes()).padStart(2, '0')
-  
+
   return `${dia} de ${mes} de ${ano} (${diaSemana}) às ${horas}:${minutos} horas`
 }
 
@@ -402,8 +396,7 @@ const getSessions = async (page = 1) => {
       page,
       per_page: pagination.value.perPage
     }
-    
-    // Adicionar filtros apenas se tiverem valor
+
     if (filters.value.name) {
       params.name = filters.value.name
     }
@@ -416,10 +409,10 @@ const getSessions = async (page = 1) => {
     if (filters.value.tipo) {
       params.session_type_id = filters.value.tipo
     }
-    
+
     const response = await sessoesService.get(params)
     console.log('Sessões retornadas:', response.data)
-    
+
     sessoes.value = response.data
     pagination.value = {
       currentPage: response.current_page,
@@ -434,17 +427,15 @@ const getSessions = async (page = 1) => {
   }
 }
 
-// Watch para o campo de busca por nome (com debounce)
 watch(() => filters.value.name, () => {
   if (debounceTimeout) {
     clearTimeout(debounceTimeout)
   }
   debounceTimeout = setTimeout(() => {
     getSessions(1)
-  }, 500) // 500ms de delay
+  }, 500)
 })
 
-// Watch para os outros filtros (sem debounce)
 watch(
   () => [filters.value.ano, filters.value.mes, filters.value.tipo],
   () => {

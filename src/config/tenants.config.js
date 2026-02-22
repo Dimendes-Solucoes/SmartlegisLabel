@@ -1,17 +1,10 @@
-/**
- * Configuração de Multi-Tenancy baseada em subdomínio
- * 
- * Cada tenant tem suas próprias configurações de API, branding, etc.
- * 
- * Gerado a partir dos arquivos: appConfing.js, axios.js e envprod.txt
- */
 
-// URL do S3 para assets (produção)
+
 const S3_HOST = 'https://smartlegis-production.s3.amazonaws.com'
 const STAMP_PATH = '/tenancy/app/public/'
 
 export const TENANTS_CONFIG = {
-  // Configuração para João Câmara
+
   'jc': {
     name: 'João Câmara',
     fullName: 'Câmara Municipal de João Câmara - RN',
@@ -28,7 +21,6 @@ export const TENANTS_CONFIG = {
     }
   },
 
-  // Configuração para Bodó
   'bd': {
     name: 'Bodó',
     fullName: 'Câmara Municipal de Bodó - RN',
@@ -45,7 +37,6 @@ export const TENANTS_CONFIG = {
     }
   },
 
-  // Configuração para Pedro Avelino
   'pa': {
     name: 'Pedro Avelino',
     fullName: 'Câmara Municipal de Pedro Avelino - RN',
@@ -62,7 +53,6 @@ export const TENANTS_CONFIG = {
     }
   },
 
-  // Configuração para Pedra Preta
   'pp': {
     name: 'Pedra preta',
     fullName: 'Câmara Municipal de Pedra preta - RN',
@@ -79,7 +69,6 @@ export const TENANTS_CONFIG = {
     }
   },
 
-  // Configuração para Campo Grande
   'cg': {
     name: 'Campo Grande',
     fullName: 'Câmara Municipal de Campo Grande - RN',
@@ -96,7 +85,6 @@ export const TENANTS_CONFIG = {
     }
   },
 
-  // Configuração para Lajes
   'lajes': {
     name: 'Lajes',
     fullName: 'Câmara Municipal de Lajes - RN',
@@ -113,7 +101,6 @@ export const TENANTS_CONFIG = {
     }
   },
 
-  // Configuração para Cerro Corá
   'cc': {
     name: 'Cerro Corá',
     fullName: 'Câmara Municipal de Cerro Corá - RN',
@@ -130,7 +117,6 @@ export const TENANTS_CONFIG = {
     }
   },
 
-  // Configuração para Parazinho
   'parazinho': {
     name: 'Parazinho',
     fullName: 'Câmara Municipal de Parazinho - RN',
@@ -147,7 +133,6 @@ export const TENANTS_CONFIG = {
     }
   },
 
-  // Configuração para Jandaíra
   'jd': {
     name: 'Jandaíra',
     fullName: 'Câmara Municipal de Jandaíra - RN',
@@ -164,7 +149,6 @@ export const TENANTS_CONFIG = {
     }
   },
 
-  // Configuração para Triunfo Potiguar
   'tp': {
     name: 'Triunfo Potiguar',
     fullName: 'Câmara Municipal de Triunfo Potiguar - RN',
@@ -181,7 +165,6 @@ export const TENANTS_CONFIG = {
     }
   },
 
-  // Configuração para Upanema
   'upanema': {
     name: 'Upanema',
     fullName: 'Câmara Municipal de Upanema - RN',
@@ -198,7 +181,6 @@ export const TENANTS_CONFIG = {
     }
   },
 
-  // Configuração para Jardim de Angicos
   'ja': {
     name: 'Jardim de angicos',
     fullName: 'Câmara Municipal de Jardim de angicos - RN',
@@ -215,7 +197,6 @@ export const TENANTS_CONFIG = {
     }
   },
 
-  // Configuração para Angicos
   'angicos': {
     name: 'Angicos',
     fullName: 'Câmara Municipal de Angicos - RN',
@@ -232,7 +213,6 @@ export const TENANTS_CONFIG = {
     }
   },
 
-  // Configuração para CRV
   'crv': {
     name: 'CRV',
     fullName: 'Câmara Municipal de CRV - RN',
@@ -249,7 +229,6 @@ export const TENANTS_CONFIG = {
     }
   },
 
-  // Configuração para Goianinha
   'goianinha': {
     name: 'Goianinha',
     fullName: 'Câmara Municipal de Goianinha - RN',
@@ -266,7 +245,6 @@ export const TENANTS_CONFIG = {
     }
   },
 
-  // Configuração para Olho d'água do Borges
   'odb': {
     name: 'Olho-d\'água do borges',
     fullName: 'Câmara Municipal de Olho-d\'água do borges - RN',
@@ -283,7 +261,6 @@ export const TENANTS_CONFIG = {
     }
   },
 
-  // Configuração para Jucurutu
   'jucurutu': {
     name: 'Jucurutu',
     fullName: 'Câmara Municipal de Jucurutu - RN',
@@ -300,7 +277,6 @@ export const TENANTS_CONFIG = {
     }
   },
 
-  // Configuração para Serra do Mel
   'sm': {
     name: 'Serra do mel',
     fullName: 'Câmara Municipal de Serra do mel - RN',
@@ -317,7 +293,6 @@ export const TENANTS_CONFIG = {
     }
   },
 
-  // Configuração para Lagoa de Pedras
   'lp': {
     name: 'Lagoa de pedras',
     fullName: 'Câmara Municipal de Lagoa de pedras - RN',
@@ -334,7 +309,6 @@ export const TENANTS_CONFIG = {
     }
   },
 
-  // Configuração para São Rafael
   'sr': {
     name: 'São rafael',
     fullName: 'Câmara Municipal de São rafael - RN',
@@ -351,7 +325,6 @@ export const TENANTS_CONFIG = {
     }
   },
 
-  // Configuração para Baía Formosa
   'bf': {
     name: 'Baia formosa',
     fullName: 'Câmara Municipal de Baia formosa - RN',
@@ -368,7 +341,6 @@ export const TENANTS_CONFIG = {
     }
   },
 
-  // Configuração para São Bento do Norte
   'sbn': {
     name: 'São bento do norte',
     fullName: 'Câmara Municipal de São bento do norte - RN',
@@ -385,7 +357,6 @@ export const TENANTS_CONFIG = {
     }
   },
 
-  // Configuração para Pureza
   'pureza': {
     name: 'Pureza',
     fullName: 'Câmara Municipal de Pureza - RN',
@@ -402,7 +373,6 @@ export const TENANTS_CONFIG = {
     }
   },
 
-  // Configuração para Afonso Bezerra
   'afonsobezerra': {
     name: 'Afonso bezerra',
     fullName: 'Câmara Municipal de Afonso bezerra - RN',
@@ -419,7 +389,6 @@ export const TENANTS_CONFIG = {
     }
   },
 
-  // Configuração para Macaíba
   'macaiba': {
     name: 'Macaíba',
     fullName: 'Câmara Municipal de Macaíba - RN',
@@ -436,7 +405,6 @@ export const TENANTS_CONFIG = {
     }
   },
 
-  // Configuração para Vera Cruz
   'veracruz': {
     name: 'Vera Cruz',
     fullName: 'Câmara Municipal de Vera Cruz - RN',
@@ -453,7 +421,6 @@ export const TENANTS_CONFIG = {
     }
   },
 
-  // Configuração para Galinhos
   'galinhos': {
     name: 'Galinhos',
     fullName: 'Câmara Municipal de Galinhos - RN',
@@ -470,7 +437,6 @@ export const TENANTS_CONFIG = {
     }
   },
 
-  // Configuração para Rio do Fogo
   'riodofogo': {
     name: 'Rio do Fogo',
     fullName: 'Câmara Municipal de Rio do Fogo - RN',
@@ -487,7 +453,6 @@ export const TENANTS_CONFIG = {
     }
   },
 
-  // Configuração para Caraúbas
   'caraubas': {
     name: 'Caraúbas',
     fullName: 'Câmara Municipal de Caraúbas - RN',
@@ -504,7 +469,6 @@ export const TENANTS_CONFIG = {
     }
   },
 
-  // Configuração para Bento Fernandes
   'bentofernandes': {
     name: 'Bento Fernandes',
     fullName: 'Câmara Municipal de Bento Fernandes - RN',
@@ -521,7 +485,6 @@ export const TENANTS_CONFIG = {
     }
   },
 
-  // Configuração para Pedra Grande
   'pg': {
     name: 'Pedra Grande',
     fullName: 'Câmara Municipal de Pedra Grande - RN',
@@ -538,7 +501,6 @@ export const TENANTS_CONFIG = {
     }
   },
 
-  // Configuração para Poço Branco
   'pb': {
     name: 'Poço Branco',
     fullName: 'Câmara Municipal de Poço Branco - RN',
@@ -555,7 +517,6 @@ export const TENANTS_CONFIG = {
     }
   },
 
-  // Configuração para Serra Negra do Norte
   'snn': {
     name: 'Serra Negra do Norte',
     fullName: 'Câmara Municipal de Serra Negra do Norte - RN',
@@ -572,7 +533,6 @@ export const TENANTS_CONFIG = {
     }
   },
 
-  // Configuração para Serrinha
   'serrinha': {
     name: 'Serrinha',
     fullName: 'Câmara Municipal de Serrinha - RN',
@@ -589,7 +549,6 @@ export const TENANTS_CONFIG = {
     }
   },
 
-  // Configuração para Serra de São Bento
   'ssb': {
     name: 'Serra de São Bento',
     fullName: 'Câmara Municipal de Serra de São Bento - RN',
@@ -606,7 +565,6 @@ export const TENANTS_CONFIG = {
     }
   },
 
-  // Configuração para Timbaúba dos Batistas
   'tb': {
     name: 'Timbaúba dos Batistas',
     fullName: 'Câmara Municipal de Timbaúba dos Batistas - RN',
@@ -623,7 +581,6 @@ export const TENANTS_CONFIG = {
     }
   },
 
-  // Configuração para Várzea
   'varzea': {
     name: 'Varzea',
     fullName: 'Câmara Municipal de Varzea - RN',
@@ -640,7 +597,6 @@ export const TENANTS_CONFIG = {
     }
   },
 
-  // Configuração para Felipe Guerra
   'felipeguerra': {
     name: 'Felipe Guerra',
     fullName: 'Câmara Municipal de Felipe Guerra - RN',
@@ -657,7 +613,6 @@ export const TENANTS_CONFIG = {
     }
   },
 
-  // Configuração para Tenente Ananias
   'tenenteananias': {
     name: 'Tenente Ananias',
     fullName: 'Câmara Municipal de Tenente Ananias - RN',
@@ -674,7 +629,6 @@ export const TENANTS_CONFIG = {
     }
   },
 
-  // Configuração para Brejinho
   'brejinho': {
     name: 'Brejinho',
     fullName: 'Câmara Municipal de Brejinho - RN',
@@ -691,7 +645,6 @@ export const TENANTS_CONFIG = {
     }
   },
 
-  // Configuração para Caiçara do Norte
   'cn': {
     name: 'Caiçara do Norte',
     fullName: 'Câmara Municipal de Caiçara do Norte - RN',
@@ -708,7 +661,6 @@ export const TENANTS_CONFIG = {
     }
   },
 
-  // Configuração para Lagoa d'Anta
   'lagoadanta': {
     name: 'Lagoa d\'Anta',
     fullName: 'Câmara Municipal de Lagoa d\'Anta - RN',
@@ -725,7 +677,6 @@ export const TENANTS_CONFIG = {
     }
   },
 
-  // Configuração para Messias Targino
   'mt': {
     name: 'Messias Targino',
     fullName: 'Câmara Municipal de Messias Targino - RN',
@@ -742,7 +693,6 @@ export const TENANTS_CONFIG = {
     }
   },
 
-  // Configuração para Teste
   'teste': {
     name: 'Teste',
     fullName: 'Câmara Municipal de Teste - RN',
@@ -759,7 +709,6 @@ export const TENANTS_CONFIG = {
     }
   },
 
-  // Configuração padrão (localhost e desenvolvimento)
   'default': {
     name: 'Dev',
     fullName: 'Câmara Municipal de Devs - RN',
@@ -777,10 +726,6 @@ export const TENANTS_CONFIG = {
   }
 }
 
-/**
- * Mapa de domínios completos para tenants
- * Útil para ambientes de produção
- */
 export const DOMAIN_TO_TENANT = {
   'devexterno.smartlegis.net.br': 'default',
   'testeexterno.smartlegis.net.br': 'teste',
@@ -833,53 +778,32 @@ export const DOMAIN_TO_TENANT = {
   '192.168.0.4:8080': 'default',
 }
 
-/**
- * Obtém a chave do tenant a partir do hostname
- * @param {string} hostname - O hostname atual
- * @returns {string} A chave do tenant
- */
 export function getTenantKeyFromHostname(hostname = window.location.hostname) {
-  // Remove a porta se existir
+
   const cleanHostname = hostname.split(':')[0]
-  
-  // Se o hostname completo estiver mapeado, retorna diretamente
+
   if (DOMAIN_TO_TENANT[hostname]) {
     return DOMAIN_TO_TENANT[hostname]
   }
-  
-  // Tenta encontrar pelo hostname sem porta
+
   if (DOMAIN_TO_TENANT[cleanHostname]) {
     return DOMAIN_TO_TENANT[cleanHostname]
   }
-  
-  // Extrai o subdomínio (primeira parte antes do primeiro ponto)
-  // Ex: jc.smartlegis.net.br -> jc
+
   const subdomain = cleanHostname.split('.')[0]
-  
-  // Verifica se existe um tenant com esse subdomínio
+
   if (TENANTS_CONFIG[subdomain]) {
     return subdomain
   }
-  
-  // Retorna default se não encontrar
+
   return 'default'
 }
 
-/**
- * Obtém a configuração do tenant atual
- * @param {string} hostname - O hostname atual (opcional)
- * @returns {object} A configuração do tenant
- */
 export function getCurrentTenantConfig(hostname = window.location.hostname) {
   const tenantKey = getTenantKeyFromHostname(hostname)
   return TENANTS_CONFIG[tenantKey] || TENANTS_CONFIG.default
 }
 
-/**
- * Obtém a configuração de um tenant específico
- * @param {string} tenantKey - A chave do tenant
- * @returns {object} A configuração do tenant
- */
 export function getTenantConfig(tenantKey) {
   return TENANTS_CONFIG[tenantKey] || TENANTS_CONFIG.default
 }

@@ -37,8 +37,8 @@
     <section class="features-section">
       <h2>Features Habilitadas</h2>
       <div class="features-list">
-        <div 
-          v-for="(enabled, feature) in features" 
+        <div
+          v-for="(enabled, feature) in features"
           :key="feature"
           class="feature-item"
           :class="{ enabled, disabled: !enabled }"
@@ -55,16 +55,16 @@
       <button @click="testApiRequest" :disabled="loading">
         {{ loading ? 'Carregando...' : 'Testar Requisição' }}
       </button>
-      
+
       <div v-if="apiResponse" class="api-response">
         <h3>URL Usada:</h3>
         <code>{{ apiResponse.url }}</code>
-        
+
         <h3>Status:</h3>
         <code :class="apiResponse.success ? 'success' : 'error'">
           {{ apiResponse.success ? 'Sucesso' : 'Erro' }}
         </code>
-        
+
         <div v-if="apiResponse.error">
           <h3>Erro:</h3>
           <code class="error">{{ apiResponse.error }}</code>
@@ -89,7 +89,6 @@
 import { ref, computed } from 'vue'
 import { useTenant, useTenantApi } from '@/composables/useTenant'
 
-// Usar o composable de tenant
 const {
   tenantId,
   tenantName,
@@ -103,31 +102,27 @@ const {
   isFeatureEnabled,
 } = useTenant()
 
-// Usar o composable de API
 const api = useTenantApi()
 
-// Estado do componente
 const loading = ref(false)
 const apiResponse = ref(null)
 
-// Estilos dinâmicos baseados no tema
 const headerStyle = computed(() => ({
   backgroundColor: primaryColor.value,
   color: '#ffffff',
 }))
 
-// Teste de requisição à API
 async function testApiRequest() {
   loading.value = true
   apiResponse.value = null
-  
+
   const testUrl = '/test'
   const fullUrl = apiBaseUrl.value + testUrl
-  
+
   try {
-    // Tenta fazer uma requisição GET
+
     await api.get(testUrl)
-    
+
     apiResponse.value = {
       url: fullUrl,
       success: true,

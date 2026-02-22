@@ -1,26 +1,11 @@
 import { ref, computed } from 'vue'
 import api from '@/config/axios'
 
-/**
- * Composable genérico para fazer requisições HTTP
- * Gerencia loading, erro e dados automaticamente
- * 
- * @example
- * ```js
- * const { data, loading, error, execute } = useApi()
- * await execute(() => api.get('/users'))
- * ```
- */
 export function useApi() {
   const data = ref(null)
   const loading = ref(false)
   const error = ref(null)
 
-  /**
-   * Executa uma requisição HTTP
-   * @param {Function} apiCall - Função que retorna uma Promise
-   * @returns {Promise<any>}
-   */
   const execute = async (apiCall) => {
     loading.value = true
     error.value = null
@@ -38,9 +23,6 @@ export function useApi() {
     }
   }
 
-  /**
-   * Reseta o estado
-   */
   const reset = () => {
     data.value = null
     loading.value = false
@@ -56,18 +38,9 @@ export function useApi() {
   }
 }
 
-/**
- * Composable para fazer requisições GET
- * Executa automaticamente ao montar o componente (opcional)
- * 
- * @example
- * ```js
- * const { data: users, loading, error, refresh } = useFetch('/users')
- * ```
- */
 export function useFetch(url, options = {}) {
   const { immediate = true, ...fetchOptions } = options
-  
+
   const data = ref(null)
   const loading = ref(false)
   const error = ref(null)
@@ -88,7 +61,6 @@ export function useFetch(url, options = {}) {
     }
   }
 
-  // Executar automaticamente se immediate = true
   if (immediate) {
     execute()
   }
@@ -98,30 +70,16 @@ export function useFetch(url, options = {}) {
     loading,
     error,
     execute,
-    refresh: execute, // Alias para execute
+    refresh: execute,
   }
 }
 
-/**
- * Composable CRUD genérico
- * Facilita operações de Create, Read, Update, Delete
- * 
- * @example
- * ```js
- * const materias = useCrud('/materias')
- * await materias.fetchAll()
- * await materias.create({ titulo: 'Nova Matéria' })
- * ```
- */
 export function useCrud(baseUrl) {
   const items = ref([])
   const currentItem = ref(null)
   const loading = ref(false)
   const error = ref(null)
 
-  /**
-   * Buscar todos os itens
-   */
   const fetchAll = async (params = {}) => {
     loading.value = true
     error.value = null
@@ -138,9 +96,6 @@ export function useCrud(baseUrl) {
     }
   }
 
-  /**
-   * Buscar item por ID
-   */
   const fetchById = async (id) => {
     loading.value = true
     error.value = null
@@ -157,9 +112,6 @@ export function useCrud(baseUrl) {
     }
   }
 
-  /**
-   * Criar novo item
-   */
   const create = async (data) => {
     loading.value = true
     error.value = null
@@ -176,27 +128,22 @@ export function useCrud(baseUrl) {
     }
   }
 
-  /**
-   * Atualizar item existente
-   */
   const update = async (id, data) => {
     loading.value = true
     error.value = null
 
     try {
       const result = await api.put(`${baseUrl}/${id}`, data)
-      
-      // Atualizar no array de items
+
       const index = items.value.findIndex(item => item.id === id)
       if (index !== -1) {
         items.value[index] = result
       }
-      
-      // Atualizar currentItem se for o mesmo
+
       if (currentItem.value?.id === id) {
         currentItem.value = result
       }
-      
+
       return result
     } catch (err) {
       error.value = err
@@ -206,24 +153,19 @@ export function useCrud(baseUrl) {
     }
   }
 
-  /**
-   * Deletar item
-   */
   const remove = async (id) => {
     loading.value = true
     error.value = null
 
     try {
       await api.delete(`${baseUrl}/${id}`)
-      
-      // Remover do array de items
+
       items.value = items.value.filter(item => item.id !== id)
-      
-      // Limpar currentItem se for o mesmo
+
       if (currentItem.value?.id === id) {
         currentItem.value = null
       }
-      
+
       return true
     } catch (err) {
       error.value = err
@@ -243,18 +185,10 @@ export function useCrud(baseUrl) {
     create,
     update,
     remove,
-    delete: remove, // Alias
+    delete: remove,
   }
 }
 
-/**
- * Composable para paginação
- * 
- * @example
- * ```js
- * const { data, loading, page, totalPages, nextPage, prevPage } = usePagination('/users')
- * ```
- */
 export function usePagination(url, initialLimit = 10) {
   const data = ref([])
   const loading = ref(false)
@@ -275,8 +209,7 @@ export function usePagination(url, initialLimit = 10) {
           limit: limit.value
         }
       })
-      
-      // Suporta diferentes formatos de resposta
+
       if (result.data && result.total !== undefined) {
         data.value = result.data
         total.value = result.total
@@ -285,7 +218,7 @@ export function usePagination(url, initialLimit = 10) {
       } else {
         data.value = result
       }
-      
+
       page.value = pageNumber
       return result
     } catch (err) {
@@ -314,7 +247,6 @@ export function usePagination(url, initialLimit = 10) {
     }
   }
 
-  // Buscar primeira página automaticamente
   fetchPage(1)
 
   return {
@@ -333,15 +265,6 @@ export function usePagination(url, initialLimit = 10) {
   }
 }
 
-/**
- * Composable para upload de arquivos com progresso
- * 
- * @example
- * ```js
- * const { upload, progress, uploading } = useFileUpload()
- * await upload('/upload', file)
- * ```
- */
 export function useFileUpload() {
   const uploading = ref(false)
   const progress = ref(0)
@@ -355,8 +278,7 @@ export function useFileUpload() {
     try {
       const formData = new FormData()
       formData.append(fieldName, file)
-      
-      // Adicionar dados adicionais
+
       Object.keys(additionalData).forEach(key => {
         formData.append(key, additionalData[key])
       })

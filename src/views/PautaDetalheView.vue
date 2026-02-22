@@ -61,7 +61,7 @@
 
     <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
       <h3 class="text-lg font-bold text-gray-900 mb-4">Oradores inscritos no Expediente</h3>
-      
+
       <div class="overflow-x-auto">
         <div class="grid grid-cols-12 gap-4 px-4 py-3 bg-gray-100 border-b border-gray-200">
           <div class="col-span-2 text-sm font-medium text-gray-700">Ordem</div>
@@ -84,7 +84,7 @@
 
     <div class="bg-white rounded-lg shadow-sm p-6">
       <h3 class="text-lg font-bold text-gray-900 mb-4">Ordem do dia</h3>
-      
+
       <div class="overflow-x-auto">
         <div class="grid grid-cols-12 gap-4 px-4 py-3 bg-gray-100 border-b border-gray-200 text-sm font-medium text-gray-700">
           <div class="col-span-1">Item</div>

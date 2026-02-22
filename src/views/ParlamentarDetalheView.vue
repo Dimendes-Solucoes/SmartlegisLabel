@@ -53,7 +53,7 @@
               <h2 class="text-2xl font-bold text-gray-900 mb-6">
                 {{ parlamentar.name }}
               </h2>
-              
+
               <div class="space-y-3 mb-6">
                 <div class="text-sm">
                   <span class="font-semibold text-gray-900">Data de nascimento:</span>
@@ -240,14 +240,14 @@ const mandatoAtual = computed(() => {
   if (!parlamentar.value?.legislatures || parlamentar.value.legislatures.length === 0) {
     return 'Não informado'
   }
-  
+
   const atual = parlamentar.value.legislatures[0]
   return atual.title || 'Não informado'
 })
 
 const formatDate = (dateString) => {
   if (!dateString) return 'Não informado'
-  
+
   const date = new Date(dateString)
   return date.toLocaleDateString('pt-BR')
 }

@@ -148,7 +148,6 @@
       </div>
     </div>
 
-
     <div v-if="loading" class="flex items-center justify-center py-20">
       <div class="flex flex-col items-center gap-4">
         <div class="w-12 h-12 border-4 border-gray-200 border-t-blue-600 rounded-full animate-spin"></div>
@@ -178,7 +177,6 @@
         <p class="text-sm text-gray-700 mb-4 leading-relaxed">
           {{ materia.name }}
         </p>
-
 
         <div class="grid grid-cols-2 md:grid-cols-7 gap-4 mb-4">
           <div>
@@ -237,7 +235,6 @@
         </div>
       </div>
 
-
       <div class="flex items-center justify-between pt-4">
         <div class="text-sm text-gray-600">
           Mostrando {{ startItem }}-{{ endItem }} de {{ pagination.total }} resultados
@@ -259,7 +256,7 @@
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
             </svg>
           </button>
-          
+
           <!-- Anterior -->
           <button
             @click="previousPage"
@@ -273,7 +270,7 @@
           >
             Anterior
           </button>
-          
+
           <!-- Números das páginas -->
           <button
             v-for="page in visiblePages"
@@ -289,10 +286,10 @@
           >
             {{ page }}
           </button>
-          
+
           <!-- Reticências se necessário -->
           <span v-if="showEllipsis" class="px-3 py-2 text-gray-500">...</span>
-          
+
           <!-- Última página (se não estiver visível) -->
           <button
             v-if="shouldShowLastPage"
@@ -301,7 +298,7 @@
           >
             {{ pagination.lastPage }}
           </button>
-          
+
           <!-- Próximo -->
           <button
             @click="nextPage"
@@ -315,7 +312,7 @@
           >
             Próximo
           </button>
-          
+
           <!-- Última página -->
           <button
             @click="goToPage(pagination.lastPage)"
@@ -381,44 +378,38 @@ const endItem = computed(() => {
   return end > pagination.value.total ? pagination.value.total : end
 })
 
-// Gera lista de anos de 2000 a 2030
 const years = computed(() => {
   const currentYear = new Date().getFullYear()
   const startYear = 2000
-  const endYear = currentYear + 5 // 5 anos no futuro
+  const endYear = currentYear + 5
   const yearList = []
-  
+
   for (let year = endYear; year >= startYear; year--) {
     yearList.push(year)
   }
-  
+
   return yearList
 })
 
-// Calcula as páginas visíveis (atual + até 3 para frente)
 const visiblePages = computed(() => {
   const pages = []
   const current = pagination.value.currentPage
   const last = pagination.value.lastPage
-  
-  // Adiciona página atual
+
   pages.push(current)
-  
-  // Adiciona até 3 páginas para frente
+
   for (let i = 1; i <= 3 && current + i <= last; i++) {
     pages.push(current + i)
   }
-  
+
   return pages
 })
 
-// Verifica se deve mostrar reticências
 const showEllipsis = computed(() => {
   const lastVisible = visiblePages.value[visiblePages.value.length - 1]
   return lastVisible < pagination.value.lastPage - 1
 })
 
-// Verifica se deve mostrar botão da última página separado
 const shouldShowLastPage = computed(() => {
   const lastVisible = visiblePages.value[visiblePages.value.length - 1]
   return lastVisible < pagination.value.lastPage
@@ -447,8 +438,7 @@ const getDocuments = async (page = 1) => {
       page,
       per_page: pagination.value.perPage
     }
-    
-    // Adicionar filtros apenas se tiverem valor
+
     if (searchQuery.value) {
       params.name = searchQuery.value
     }
@@ -461,8 +451,7 @@ const getDocuments = async (page = 1) => {
     if (filters.value.document_status_movement_id) {
       params.document_status_movement_id = filters.value.document_status_movement_id
     }
-    
-    // Mapear situação para os parâmetros corretos
+
     if (filters.value.situacao) {
       if (filters.value.situacao === 'aprovado') {
         params.is_approved = true
@@ -472,10 +461,10 @@ const getDocuments = async (page = 1) => {
         params.document_status_movement_id = 2
       }
     }
-    
+
     const response = await materiasService.get(params)
     console.log('Detalhes das matérias:', response)
-    
+
     materias.value = response.data
     pagination.value = {
       currentPage: response.current_page,
@@ -492,7 +481,6 @@ const getDocuments = async (page = 1) => {
   }
 }
 
-// Watch para o campo de busca (com debounce)
 watch(() => searchQuery.value, () => {
   if (debounceTimeout) {
     clearTimeout(debounceTimeout)
@@ -504,7 +492,6 @@ watch(() => searchQuery.value, () => {
   }, 500)
 })
 
-// Watch para os filtros (sem debounce)
 watch(
   () => [filters.value.document_category_id, filters.value.year, filters.value.document_status_movement_id, filters.value.situacao],
   () => {
@@ -537,36 +524,35 @@ const goToPage = (page) => {
 
 const formatDateTimeExtended = (dateTimeString) => {
   if (!dateTimeString) return 'Data não informada'
-  
+
   const meses = [
     'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
     'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
   ]
-  
+
   const diasSemana = [
     'Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira',
     'Quinta-feira', 'Sexta-feira', 'Sábado'
   ]
-  
+
   const data = new Date(dateTimeString)
-  
+
   const dia = data.getDate()
   const mes = meses[data.getMonth()]
   const ano = data.getFullYear()
   const diaSemana = diasSemana[data.getDay()]
   const horas = String(data.getHours()).padStart(2, '0')
   const minutos = String(data.getMinutes()).padStart(2, '0')
-  
+
   return `${dia} de ${mes} de ${ano} (${diaSemana}) às ${horas}:${minutos} horas`
 }
 
 const formatDate = (dateString) => {
   if (!dateString) return 'Não informado'
-  
+
   const date = new Date(dateString)
   return date.toLocaleDateString('pt-BR')
 }
-
 
 const handleSearch = () => {
   getDocuments(1)

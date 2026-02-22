@@ -1,15 +1,8 @@
 import api from '@/config/axios'
 import { saveToken, removeToken } from '@/utils/auth-token'
 
-/**
- * Service para gerenciar Matérias Legislativas
- */
 export class MateriasService {
-  /**
-   * Lista todas as matérias com filtros opcionais
-   * @param {Object} filtros - Filtros de busca
-   * @returns {Promise<Array>}
-   */
+
   async get(filtros = {}) {
     return await api.get('/external/documents', { params: filtros })
   }
@@ -18,20 +11,10 @@ export class MateriasService {
     return await api.get('/external/documents-categories')
   }
 
-  /**
-   * Busca matéria por ID
-   * @param {number|string} id - ID da matéria
-   * @returns {Promise<Object>}
-   */
   async buscarPorId(id) {
     return await api.get(`/external/documents/${id}`)
   }
 
-  /**
-   * Busca com paginação
-   * @param {Object} params - Parâmetros de paginação e filtros
-   * @returns {Promise<Object>}
-   */
   async buscarPaginado({ page = 1, limit = 10, search = '', tipo = '' }) {
     return await api.get('/external/documents', {
       params: { page, limit, search, tipo }
@@ -40,9 +23,6 @@ export class MateriasService {
 
 }
 
-/**
- * Service para gerenciar Legislaturas
- */
 export class LegislaturasService {
   async get() {
     return await api.get('/external/legislatures')
@@ -50,9 +30,6 @@ export class LegislaturasService {
 
 }
 
-/**
- * Service para gerenciar Parlamentares
- */
 export class ParlamentaresService {
   async get(filtros = {}) {
     return await api.get('/external/users', { params: filtros })
@@ -63,18 +40,12 @@ export class ParlamentaresService {
   }
 }
 
-/**
- * Service para gerenciar Partidos
- */
 export class PartidosService {
   async get() {
     return await api.get('/external/category-parties')
   }
 }
 
-/**
- * Service para gerenciar Sessões Plenárias
- */
 export class SessoesService {
   async get(filtros = {}) {
     return await api.get('/external/sessions', { params: filtros })
@@ -90,9 +61,6 @@ export class SessoesService {
 
 }
 
-/**
- * Service para gerenciar Comissões
- */
 export class ComissoesService {
   async listar() {
     return await api.get('/comissoes')
@@ -126,9 +94,6 @@ export class ComissoesService {
   }
 }
 
-/**
- * Service para gerenciar Mesa Diretora
- */
 export class MesaDiretoraService {
   async buscar() {
     return await api.get('/mesa-diretora')
@@ -150,9 +115,6 @@ export class MesaDiretoraService {
   }
 }
 
-/**
- * Service para gerenciar Normas Jurídicas
- */
 export class NormasService {
   async listar(filtros = {}) {
     return await api.get('/normas', { params: filtros })
@@ -179,35 +141,24 @@ export class NormasService {
   }
 }
 
-/**
- * Service para gerenciar Relatórios
- */
 export class RelatoriosService {
   async get(filtros = {}) {
     return await api.get('/external/documents/statistics', { params: filtros })
   }
 }
 
-/**
- * Service para Autenticação
- */
 export class AuthService {
-  /**
-   * Obtém token de acesso externo
-   * Deve ser chamado ao inicializar a aplicação
-   */
+
   async getExternalAccess() {
     try {
       const response = await api.post('/external/access')
-      
-      // Salvar token no localStorage
+
       if (response.token) {
         saveToken(response.token)
-        
-        // Configurar token no Axios para próximas requisições
+
         api.defaults.headers.common['Authorization'] = `Bearer ${response.token}`
       }
-      
+
       return response
     } catch (error) {
       console.error('Erro ao obter token de acesso externo:', error)
@@ -217,12 +168,11 @@ export class AuthService {
 
   async login(email, password) {
     const response = await api.post('/auth/login', { email, password })
-    
-    // Salvar token se retornado
+
     if (response.token) {
       saveToken(response.token)
     }
-    
+
     return response
   }
 
@@ -237,11 +187,11 @@ export class AuthService {
 
   async refreshToken() {
     const response = await api.post('/auth/refresh')
-    
+
     if (response.token) {
       saveToken(response.token)
     }
-    
+
     return response
   }
 
@@ -258,7 +208,6 @@ export class AuthService {
   }
 }
 
-// Exportar instâncias dos services (singleton)
 export const materiasService = new MateriasService()
 export const parlamentaresService = new ParlamentaresService()
 export const legislaturasService = new LegislaturasService()
@@ -270,7 +219,6 @@ export const normasService = new NormasService()
 export const relatoriosService = new RelatoriosService()
 export const authService = new AuthService()
 
-// Exportar também como default para uso alternativo
 export default {
   materias: materiasService,
   parlamentares: parlamentaresService,

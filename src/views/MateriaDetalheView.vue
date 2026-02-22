@@ -71,11 +71,11 @@
             <p class="text-sm font-medium text-gray-900">{{ materia.document_status_movement_id != 6 ? 'Sim' : 'Não' }}</p>
           </div>
           <div v-if="materia.authors && materia.authors.length > 0" class="flex items-center gap-2">
-            <img 
+            <img
               v-if="materia.authors[0].path_image"
-              :src="S3_HOST + materia.authors[0].path_image" 
-              :alt="materia.authors[0].name" 
-              class="w-8 h-8 rounded-full object-cover" 
+              :src="S3_HOST + materia.authors[0].path_image"
+              :alt="materia.authors[0].name"
+              class="w-8 h-8 rounded-full object-cover"
             />
             <div v-else class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
               <svg class="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
@@ -157,7 +157,7 @@ const loading = ref(true)
 
 const formatDate = (dateString) => {
   if (!dateString) return 'N/A'
-  
+
   const date = new Date(dateString)
   return date.toLocaleDateString('pt-BR')
 }

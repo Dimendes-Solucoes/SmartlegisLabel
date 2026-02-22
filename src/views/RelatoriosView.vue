@@ -112,19 +112,19 @@
         <p class="text-white text-4xl font-bold">{{ dataReport.total || 0 }}</p>
         <p class="text-white text-sm">Total</p>
       </div>
-      
+
       <div class="bg-gray-100 rounded-lg p-6">
         <p class="text-gray-700 text-sm mb-2">Tipo de documento mais produzido</p>
         <p class="text-gray-900 text-4xl font-bold">{{ dataReport.most_sent_category?.total || 0 }}</p>
         <p class="text-gray-700 text-sm">{{ dataReport.most_sent_category?.name || '-' }}</p>
       </div>
-      
+
       <div class="bg-gray-100 rounded-lg p-6">
         <p class="text-gray-700 text-sm mb-2">Tipo de documento menos produzido</p>
         <p class="text-gray-900 text-4xl font-bold">{{ dataReport.least_sent_category?.total || 0 }}</p>
         <p class="text-gray-700 text-sm">{{ dataReport.least_sent_category?.name || '-' }}</p>
       </div>
-      
+
       <div class="bg-gray-100 rounded-lg p-6">
         <p class="text-gray-700 text-sm mb-2">{{ textoMedia }}</p>
         <p class="text-gray-900 text-4xl font-bold">{{ dataReport.average_per_author || 0 }}</p>
@@ -143,72 +143,72 @@
             <line x1="40" y1="210" x2="460" y2="210" stroke="#E5E7EB" stroke-width="1"/>
             <line x1="40" y1="140" x2="460" y2="140" stroke="#E5E7EB" stroke-width="1"/>
             <line x1="40" y1="70" x2="460" y2="70" stroke="#E5E7EB" stroke-width="1"/>
-            
+
             <!-- Barras dinâmicas -->
-            <g 
-              v-for="(category, index) in categoryData" 
-              :key="category.id" 
+            <g
+              v-for="(category, index) in categoryData"
+              :key="category.id"
               style="cursor: pointer;"
               @click="selectCategory(index)"
             >
               <title>{{ category.name }}</title>
-              
-              <rect 
-                :x="getCategoryX(index)" 
-                :y="getCategoryY(category.total)" 
-                width="35" 
-                :height="getCategoryHeight(category.total)" 
-                :fill="selectedCategory === index ? '#005A8C' : '#007AB8'" 
+
+              <rect
+                :x="getCategoryX(index)"
+                :y="getCategoryY(category.total)"
+                width="35"
+                :height="getCategoryHeight(category.total)"
+                :fill="selectedCategory === index ? '#005A8C' : '#007AB8'"
                 rx="2"
               />
-              
+
               <!-- Abreviação da categoria no eixo X -->
-              <text 
-                :x="getCategoryX(index) + 17.5" 
-                y="300" 
-                text-anchor="middle" 
-                :fill="selectedCategory === index ? '#007AB8' : '#6B7280'" 
+              <text
+                :x="getCategoryX(index) + 17.5"
+                y="300"
+                text-anchor="middle"
+                :fill="selectedCategory === index ? '#007AB8' : '#6B7280'"
                 :font-weight="selectedCategory === index ? 'bold' : 'normal'"
                 font-size="10"
               >
                 {{ category.abbreviation }}
               </text>
             </g>
-            
+
             <!-- Tooltip da categoria selecionada -->
             <template v-if="selectedCategory !== null && categoryData[selectedCategory]">
-              <rect 
-                :x="getCategoryX(selectedCategory) - 7.5" 
-                :y="getCategoryY(categoryData[selectedCategory].total) - 55" 
-                width="50" 
-                height="35" 
-                fill="#1F2937" 
-                opacity="0.95" 
+              <rect
+                :x="getCategoryX(selectedCategory) - 7.5"
+                :y="getCategoryY(categoryData[selectedCategory].total) - 55"
+                width="50"
+                height="35"
+                fill="#1F2937"
+                opacity="0.95"
                 rx="4"
               />
-              <text 
-                :x="getCategoryX(selectedCategory) + 17.5" 
-                :y="getCategoryY(categoryData[selectedCategory].total) - 39" 
-                text-anchor="middle" 
-                fill="white" 
-                font-size="9" 
+              <text
+                :x="getCategoryX(selectedCategory) + 17.5"
+                :y="getCategoryY(categoryData[selectedCategory].total) - 39"
+                text-anchor="middle"
+                fill="white"
+                font-size="9"
                 font-weight="600"
               >
                 {{ categoryData[selectedCategory].abbreviation }}
               </text>
-              <text 
-                :x="getCategoryX(selectedCategory) + 17.5" 
-                :y="getCategoryY(categoryData[selectedCategory].total) - 39" 
-                text-anchor="middle" 
-                fill="white" 
-                font-size="13" 
+              <text
+                :x="getCategoryX(selectedCategory) + 17.5"
+                :y="getCategoryY(categoryData[selectedCategory].total) - 39"
+                text-anchor="middle"
+                fill="white"
+                font-size="13"
                 font-weight="bold"
                 dy="14"
               >
                 {{ categoryData[selectedCategory].total }}
               </text>
             </template>
-            
+
             <!-- Labels do eixo Y -->
             <text x="30" y="285" text-anchor="end" fill="#6B7280" font-size="12">0</text>
             <text x="30" y="215" text-anchor="end" fill="#6B7280" font-size="12">{{ Math.round(maxCategoryValue / 3) }}</text>
@@ -221,7 +221,7 @@
       <div class="bg-white rounded-lg shadow-sm p-6">
         <h3 class="text-lg font-bold text-gray-900 mb-2">{{ tituloRanking }}</h3>
         <p class="text-sm text-gray-600 mb-6">{{ subtituloRanking }}</p>
-        
+
         <div class="space-y-3">
           <div v-for="(item, index) in dataReport.top_authors" :key="index">
             <div class="flex items-center justify-between text-sm mb-1">
@@ -229,14 +229,14 @@
               <span class="text-gray-900 font-semibold">{{ item.total }}</span>
             </div>
             <div class="w-full bg-gray-200 rounded-full h-3">
-              <div 
-                class="h-3 rounded-full transition-all duration-300" 
+              <div
+                class="h-3 rounded-full transition-all duration-300"
                 :style="{ width: calculateWidth(item.total) + '%', backgroundColor: '#007AB8' }"
               ></div>
             </div>
           </div>
         </div>
-        
+
         <div v-if="!isParlamentarSelecionado" class="flex items-center justify-between mt-4 text-xs text-gray-500">
           <span>0</span>
           <span>{{ Math.round(maxRankingValue / 4) }}</span>
@@ -249,7 +249,7 @@
     <div class="bg-white rounded-lg shadow-sm p-6">
       <h3 class="text-lg font-bold text-gray-900 mb-2">Evolução</h3>
       <p class="text-sm text-gray-600 mb-6">Documentos produzidos ao longo do período</p>
-      
+
       <div class="relative h-64">
         <svg class="w-full h-full" viewBox="0 0 800 250">
           <!-- Linhas horizontais do grid -->
@@ -257,22 +257,22 @@
           <line x1="40" y1="165" x2="760" y2="165" stroke="#E5E7EB" stroke-width="1"/>
           <line x1="40" y1="110" x2="760" y2="110" stroke="#E5E7EB" stroke-width="1"/>
           <line x1="40" y1="55" x2="760" y2="55" stroke="#E5E7EB" stroke-width="1"/>
-          
+
           <!-- Linha de evolução dinâmica -->
-          <polyline 
+          <polyline
             :points="evolutionPoints"
             fill="none"
             stroke="#007AB8"
             stroke-width="3"
           />
-          
+
           <!-- Pontos nos meses (dinâmicos e clicáveis) -->
-          <circle 
-            v-for="(total, index) in monthlyData" 
+          <circle
+            v-for="(total, index) in monthlyData"
             :key="'circle-' + index"
-            :cx="monthXPositions[index]" 
-            :cy="getYPosition(total)" 
-            :r="selectedMonth === index ? 8 : 5" 
+            :cx="monthXPositions[index]"
+            :cy="getYPosition(total)"
+            :r="selectedMonth === index ? 8 : 5"
             :fill="selectedMonth === index ? '#0056A3' : '#007AB8'"
             :stroke="selectedMonth === index ? '#003D75' : 'none'"
             :stroke-width="selectedMonth === index ? 2 : 0"
@@ -280,67 +280,67 @@
             style="cursor: pointer;"
             @click="selectMonth(index)"
           />
-          
+
           <!-- Área clicável maior (invisível) para facilitar o click -->
-          <circle 
-            v-for="(total, index) in monthlyData" 
+          <circle
+            v-for="(total, index) in monthlyData"
             :key="'hitbox-' + index"
-            :cx="monthXPositions[index]" 
-            :cy="getYPosition(total)" 
-            r="15" 
+            :cx="monthXPositions[index]"
+            :cy="getYPosition(total)"
+            r="15"
             fill="transparent"
             style="cursor: pointer;"
             @click="selectMonth(index)"
           />
-          
+
           <!-- Tooltip do mês selecionado -->
           <template v-if="selectedMonth !== null && monthlyData[selectedMonth] !== undefined">
-            <rect 
-              :x="monthXPositions[selectedMonth] - 25" 
-              :y="getYPosition(monthlyData[selectedMonth]) - 55" 
-              width="50" 
-              height="35" 
-              fill="#1F2937" 
-              opacity="0.95" 
+            <rect
+              :x="monthXPositions[selectedMonth] - 25"
+              :y="getYPosition(monthlyData[selectedMonth]) - 55"
+              width="50"
+              height="35"
+              fill="#1F2937"
+              opacity="0.95"
               rx="4"
             />
-            <text 
-              :x="monthXPositions[selectedMonth]" 
-              :y="getYPosition(monthlyData[selectedMonth]) - 39" 
-              text-anchor="middle" 
-              fill="white" 
-              font-size="11" 
+            <text
+              :x="monthXPositions[selectedMonth]"
+              :y="getYPosition(monthlyData[selectedMonth]) - 39"
+              text-anchor="middle"
+              fill="white"
+              font-size="11"
               font-weight="600"
             >
               {{ monthNames[selectedMonth] }}
             </text>
-            <text 
-              :x="monthXPositions[selectedMonth]" 
-              :y="getYPosition(monthlyData[selectedMonth]) - 39" 
-              text-anchor="middle" 
-              fill="white" 
-              font-size="13" 
+            <text
+              :x="monthXPositions[selectedMonth]"
+              :y="getYPosition(monthlyData[selectedMonth]) - 39"
+              text-anchor="middle"
+              fill="white"
+              font-size="13"
               font-weight="bold"
               dy="14"
             >
               {{ monthlyData[selectedMonth] }}
             </text>
           </template>
-          
+
           <!-- Labels dos meses no eixo X -->
-          <text 
-            v-for="(month, index) in monthNames" 
+          <text
+            v-for="(month, index) in monthNames"
             :key="'month-' + index"
-            :x="monthXPositions[index]" 
-            y="240" 
-            text-anchor="middle" 
-            :fill="selectedMonth === index ? '#007AB8' : '#6B7280'" 
+            :x="monthXPositions[index]"
+            y="240"
+            text-anchor="middle"
+            :fill="selectedMonth === index ? '#007AB8' : '#6B7280'"
             :font-weight="selectedMonth === index ? 'bold' : 'normal'"
             font-size="11"
           >
             {{ month }}
           </text>
-          
+
           <!-- Labels do eixo Y (dinâmicos) -->
           <text x="30" y="225" text-anchor="end" fill="#6B7280" font-size="11">{{ yAxisLabels[0] }}</text>
           <text x="30" y="170" text-anchor="end" fill="#6B7280" font-size="11">{{ yAxisLabels[1] }}</text>
@@ -358,9 +358,9 @@ import { ref, onMounted, computed, watch } from 'vue'
 import { relatoriosService, parlamentaresService } from '@/services/api'
 
 const loading = ref(false)
-const selectedMonth = ref(null) // Índice do mês selecionado (0-11)
-const selectedCategory = ref(null) // Índice da categoria selecionada
-const isInitialLoad = ref(true) // Flag para controlar carga inicial
+const selectedMonth = ref(null)
+const selectedCategory = ref(null)
+const isInitialLoad = ref(true)
 
 const filters = ref({
   date_start: '2026-01-01',
@@ -380,14 +380,12 @@ const dataReport = ref({
 
 const todosParlamentares = ref([])
 
-// Verifica se um parlamentar específico está selecionado
 const isParlamentarSelecionado = computed(() => {
   return filters.value.author_id !== 'todos'
 })
 
-// Textos dinâmicos baseados no filtro
 const textoTotalDocumentos = computed(() => {
-  return isParlamentarSelecionado.value 
+  return isParlamentarSelecionado.value
     ? 'Total de documentos enviados por este parlamentar'
     : 'Total de documentos'
 })
@@ -410,7 +408,6 @@ const subtituloRanking = computed(() => {
     : 'Parlamentares que mais produziram documentos'
 })
 
-// Calcula o valor máximo do ranking para usar como base (100%)
 const maxRankingValue = computed(() => {
   if (!dataReport.value.top_authors || dataReport.value.top_authors.length === 0) {
     return 1
@@ -418,43 +415,36 @@ const maxRankingValue = computed(() => {
   return Math.max(...dataReport.value.top_authors.map(item => item.total))
 })
 
-// Processa dados de categorias - top 8
 const categoryData = computed(() => {
   const categories = dataReport.value.per_category || []
   return categories
-    .sort((a, b) => b.total - a.total) // Ordena por total decrescente
-    .slice(0, 8) // Pega apenas os 8 primeiros
+    .sort((a, b) => b.total - a.total)
+    .slice(0, 8)
 })
 
-// Calcula o valor máximo de categorias
 const maxCategoryValue = computed(() => {
   if (categoryData.value.length === 0) return 100
   return Math.max(...categoryData.value.map(cat => cat.total))
 })
 
-// Função para calcular posição X das barras de categoria
 const getCategoryX = (index) => {
-  const spacing = 60 // espaçamento entre barras
+  const spacing = 60
   return 60 + (index * spacing)
 }
 
-// Função para calcular altura das barras de categoria
 const getCategoryHeight = (total) => {
-  const maxHeight = 210 // altura máxima da barra em pixels
+  const maxHeight = 210
   return (total / maxCategoryValue.value) * maxHeight
 }
 
-// Função para calcular posição Y das barras de categoria
 const getCategoryY = (total) => {
   return 280 - getCategoryHeight(total)
 }
 
-// Função para calcular a porcentagem proporcional ao máximo
 const calculateWidth = (total) => {
   return (total / maxRankingValue.value) * 100
 }
 
-// Processa dados do gráfico de evolução mensal
 const monthlyData = computed(() => {
   const months = Array.from({ length: 12 }, (_, i) => {
     const monthData = dataReport.value.per_month?.find(m => m.month === i + 1)
@@ -465,10 +455,9 @@ const monthlyData = computed(() => {
 
 const maxMonthlyValue = computed(() => {
   const max = Math.max(...monthlyData.value)
-  return max > 0 ? max : 30 // Padrão 30 se não houver dados
+  return max > 0 ? max : 30
 })
 
-// Inicializa com o mês de maior valor quando os dados carregam
 watch(monthlyData, (newData) => {
   if (newData.length > 0 && selectedMonth.value === null) {
     const maxIndex = newData.indexOf(Math.max(...newData))
@@ -476,46 +465,40 @@ watch(monthlyData, (newData) => {
   }
 }, { immediate: true })
 
-// Inicializa com a categoria de maior valor quando os dados carregam
 watch(categoryData, (newData) => {
   if (newData.length > 0) {
-    // Se não há categoria selecionada ou a categoria selecionada está fora do range
+
     if (selectedCategory.value === null || selectedCategory.value >= newData.length) {
-      selectedCategory.value = 0 // Primeira categoria (já ordenada por maior valor)
+      selectedCategory.value = 0
     }
   } else {
-    // Se não há dados, limpa a seleção
+
     selectedCategory.value = null
   }
 }, { immediate: true })
 
-// Busca automaticamente quando o autor é alterado
 watch(() => filters.value.author_id, () => {
-  // Não busca na primeira renderização
+
   if (isInitialLoad.value) {
     return
   }
   handleSearch()
 })
 
-// Calcula a posição Y no gráfico baseado no valor
 const getYPosition = (total) => {
-  const graphHeight = 165 // altura útil do gráfico (220 - 55)
+  const graphHeight = 165
   const percentage = total / maxMonthlyValue.value
   return 220 - (percentage * graphHeight)
 }
 
-// Posições X dos meses
 const monthXPositions = [60, 120, 180, 240, 300, 360, 420, 480, 540, 600, 660, 720]
 
-// Gera os pontos da polyline dinamicamente
 const evolutionPoints = computed(() => {
   return monthlyData.value
     .map((total, index) => `${monthXPositions[index]},${getYPosition(total)}`)
     .join(' ')
 })
 
-// Escala do eixo Y
 const yAxisLabels = computed(() => {
   const max = maxMonthlyValue.value
   return [
@@ -526,17 +509,14 @@ const yAxisLabels = computed(() => {
   ]
 })
 
-// Função para selecionar um mês
 const selectMonth = (index) => {
   selectedMonth.value = index
 }
 
-// Função para selecionar uma categoria
 const selectCategory = (index) => {
   selectedCategory.value = index
 }
 
-// Nomes dos meses
 const monthNames = ['JAN', 'FEV', 'MAR', 'ABR', 'MAI', 'JUN', 'JUL', 'AGO', 'SET', 'OUT', 'NOV', 'DEZ']
 
 onMounted(() => {
@@ -577,11 +557,11 @@ const handleSearch = () => {
     date_start: filters.value.date_start,
     date_end: filters.value.date_end
   }
-  
+
   if (filters.value.author_id !== 'todos') {
     params.author_id = filters.value.author_id
   }
-  
+
   console.log('Buscando relatórios com parâmetros:', params)
   getRelatorios(params)
 }
@@ -593,7 +573,7 @@ const clearFilters = () => {
     date_end: `${currentYear}-12-31`,
     author_id: 'todos'
   }
-  // Recarrega os relatórios com as datas padrão
+
   handleSearch()
   getRelatorios()
 }

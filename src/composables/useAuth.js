@@ -1,36 +1,24 @@
 import { ref, computed, onMounted } from 'vue'
 import { authService } from '@/services/api'
-import { 
-  getToken, 
-  hasToken, 
-  removeToken, 
+import {
+  getToken,
+  hasToken,
+  removeToken,
   isTokenExpired,
-  getUserFromToken 
+  getUserFromToken
 } from '@/utils/auth-token'
 
-/**
- * Composable para gerenciar autenticação
- * 
- * @example
- * ```js
- * const { isAuthenticated, user, login, logout } = useAuth()
- * ```
- */
 export function useAuth() {
   const token = ref(getToken())
   const user = ref(null)
   const loading = ref(false)
   const error = ref(null)
 
-  // Verifica se está autenticado
   const isAuthenticated = computed(() => {
     if (!token.value) return false
     return !isTokenExpired(token.value)
   })
 
-  /**
-   * Carrega informações do usuário do token
-   */
   function loadUserFromToken() {
     const userData = getUserFromToken()
     if (userData) {
@@ -38,9 +26,6 @@ export function useAuth() {
     }
   }
 
-  /**
-   * Faz login
-   */
   async function login(email, password) {
     loading.value = true
     error.value = null
@@ -58,9 +43,6 @@ export function useAuth() {
     }
   }
 
-  /**
-   * Faz logout
-   */
   async function logout() {
     loading.value = true
     error.value = null
@@ -71,7 +53,7 @@ export function useAuth() {
       user.value = null
     } catch (err) {
       error.value = err
-      // Remove token localmente mesmo se falhar no servidor
+
       removeToken()
       token.value = null
       user.value = null
@@ -80,9 +62,6 @@ export function useAuth() {
     }
   }
 
-  /**
-   * Busca informações do usuário autenticado
-   */
   async function fetchUser() {
     if (!isAuthenticated.value) return null
 
@@ -95,7 +74,7 @@ export function useAuth() {
       return userData
     } catch (err) {
       error.value = err
-      // Se falhar, pode ser que o token esteja inválido
+
       if (err.status === 401) {
         removeToken()
         token.value = null
@@ -107,9 +86,6 @@ export function useAuth() {
     }
   }
 
-  /**
-   * Atualiza o token
-   */
   async function refreshToken() {
     loading.value = true
     error.value = null
@@ -127,7 +103,6 @@ export function useAuth() {
     }
   }
 
-  // Carregar usuário do token ao montar
   onMounted(() => {
     if (isAuthenticated.value) {
       loadUserFromToken()
@@ -135,14 +110,13 @@ export function useAuth() {
   })
 
   return {
-    // Estado
+
     token: computed(() => token.value),
     user: computed(() => user.value),
     loading: computed(() => loading.value),
     error: computed(() => error.value),
     isAuthenticated,
 
-    // Métodos
     login,
     logout,
     fetchUser,

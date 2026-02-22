@@ -83,7 +83,6 @@
 import { ref } from 'vue'
 import { useTenant } from '@/composables/useTenant'
 
-// Obtém todas as informações do tenant
 const {
   tenantId,
   tenantName,
@@ -100,22 +99,18 @@ const {
   isFeatureEnabled,
 } = useTenant()
 
-// Estado para demonstração de requisição à API
 const apiResponse = ref(null)
 
-/**
- * Exemplo de como fazer uma requisição à API do tenant
- */
 async function testarRequisicao() {
   try {
-    // Monta a URL completa usando o helper buildApiUrl
+
     const url = buildApiUrl('/materias')
-    
+
     console.log('Fazendo requisição para:', url)
-    
+
     const response = await fetch(url)
     const data = await response.json()
-    
+
     apiResponse.value = data
   } catch (error) {
     console.error('Erro na requisição:', error)
@@ -123,15 +118,6 @@ async function testarRequisicao() {
   }
 }
 
-/**
- * Exemplo usando serviços (recomendado)
- * 
- * Em vez de usar fetch diretamente, prefira usar os serviços
- * que já estão configurados para usar o tenant correto:
- * 
- * import { materiasService } from '@/services/api'
- * const materias = await materiasService.listar()
- */
 </script>
 
 <style scoped>

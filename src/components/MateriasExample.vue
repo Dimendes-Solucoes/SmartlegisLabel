@@ -14,7 +14,7 @@
         placeholder="Buscar matéria..."
         @input="handleSearch"
       >
-      
+
       <select v-model="tipoFiltro" @change="handleFilterChange">
         <option value="">Todos os tipos</option>
         <option value="projeto-lei">Projeto de Lei</option>
@@ -49,14 +49,14 @@
           <h3>{{ materia.titulo }}</h3>
           <span class="materia-tipo">{{ materia.tipo }}</span>
         </div>
-        
+
         <p class="materia-ementa">{{ materia.ementa }}</p>
-        
+
         <div class="materia-footer">
           <span class="materia-data">
             {{ formatarData(materia.data_apresentacao) }}
           </span>
-          
+
           <div class="materia-actions">
             <button @click="editarMateria(materia)" class="btn-edit">
               Editar
@@ -99,7 +99,7 @@
     <div v-if="showUploadModal" class="modal">
       <div class="modal-content">
         <h2>Anexar Documento</h2>
-        
+
         <input
           type="file"
           @change="handleFileSelect"
@@ -139,10 +139,8 @@ import { useTenant } from '@/composables/useTenant'
 import { usePagination, useFileUpload } from '@/composables/useApi'
 import { materiasService } from '@/services/api'
 
-// Tenant info
 const { tenantName, subdomain, theme, isFeatureEnabled } = useTenant()
 
-// Estado
 const materias = ref([])
 const loading = ref(false)
 const error = ref(null)
@@ -152,16 +150,13 @@ const showUploadModal = ref(false)
 const materiaIdParaAnexo = ref(null)
 const arquivoSelecionado = ref(null)
 
-// Paginação
 const page = ref(1)
 const limit = ref(10)
 const total = ref(0)
 const totalPages = computed(() => Math.ceil(total.value / limit.value))
 
-// Upload
 const { upload, uploading, progress: uploadProgress } = useFileUpload()
 
-// Carregar matérias
 async function carregarMaterias() {
   loading.value = true
   error.value = null
@@ -181,8 +176,7 @@ async function carregarMaterias() {
     }
 
     const response = await materiasService.buscarPaginado(filtros)
-    
-    // Suporta diferentes formatos de resposta da API
+
     if (response.data && response.total !== undefined) {
       materias.value = response.data
       total.value = response.total
@@ -198,7 +192,6 @@ async function carregarMaterias() {
   }
 }
 
-// Busca com debounce
 let searchTimeout = null
 function handleSearch() {
   clearTimeout(searchTimeout)
@@ -208,13 +201,11 @@ function handleSearch() {
   }, 500)
 }
 
-// Filtro
 function handleFilterChange() {
   page.value = 1
   carregarMaterias()
 }
 
-// Paginação
 function irParaPagina(novaPagina) {
   if (novaPagina >= 1 && novaPagina <= totalPages.value) {
     page.value = novaPagina
@@ -222,19 +213,17 @@ function irParaPagina(novaPagina) {
   }
 }
 
-// Recarregar
 function recarregar() {
   carregarMaterias()
 }
 
-// CRUD
 function abrirModalCriar() {
-  // Implementar modal de criação
+
   console.log('Abrir modal de criar')
 }
 
 function editarMateria(materia) {
-  // Implementar edição
+
   console.log('Editar materia:', materia)
 }
 
@@ -249,7 +238,6 @@ async function deletarMateria(id) {
   }
 }
 
-// Upload
 function anexarDocumento(materiaId) {
   materiaIdParaAnexo.value = materiaId
   showUploadModal.value = true
@@ -274,7 +262,7 @@ async function enviarArquivo() {
       arquivoSelecionado.value,
       'Documento anexado'
     )
-    
+
     alert('Documento anexado com sucesso!')
     fecharModalUpload()
   } catch (err) {
@@ -282,12 +270,10 @@ async function enviarArquivo() {
   }
 }
 
-// Utilidades
 function formatarData(data) {
   return new Date(data).toLocaleDateString('pt-BR')
 }
 
-// Montar componente
 onMounted(() => {
   carregarMaterias()
 })

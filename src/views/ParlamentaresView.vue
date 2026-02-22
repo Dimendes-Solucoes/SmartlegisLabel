@@ -153,19 +153,19 @@ const parlamentares = computed(() => {
 
   if (searchQuery.value) {
     const query = searchQuery.value.toLowerCase()
-    resultado = resultado.filter(p => 
+    resultado = resultado.filter(p =>
       p.nickname?.toLowerCase().includes(query)
     )
   }
 
   if (selectedLegislatura.value) {
-    resultado = resultado.filter(p => 
+    resultado = resultado.filter(p =>
       p.legislatures?.some(leg => leg.id === parseInt(selectedLegislatura.value))
     )
   }
 
   if (selectedPartido.value) {
-    resultado = resultado.filter(p => 
+    resultado = resultado.filter(p =>
       p.category_party?.id === parseInt(selectedPartido.value)
     )
   }

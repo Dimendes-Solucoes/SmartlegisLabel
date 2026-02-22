@@ -41,7 +41,7 @@
         <h3 class="text-lg font-bold text-gray-900 mb-4">
           {{ sessao.name }}
         </h3>
-        
+
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-8">
             <div class="flex items-center gap-3">
@@ -55,7 +55,7 @@
                 <p class="text-sm text-gray-900">{{ formatDateTimeExtended(sessao.datetime_start) }}</p>
               </div>
             </div>
-            
+
             <div>
               <p class="text-sm font-medium text-gray-700">Encerramento</p>
               <p class="text-sm text-gray-900">{{ sessao.datetime_end ? formatDate(sessao.datetime_end) : 'Não informado' }}</p>
@@ -72,9 +72,9 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
               </svg>
             </button>
-            <button 
+            <button
               @click="goToVotacao"
-              class="px-4 py-2 rounded-lg text-sm font-medium bg-white border hover:bg-gray-50 transition-colors flex items-center gap-2" 
+              class="px-4 py-2 rounded-lg text-sm font-medium bg-white border hover:bg-gray-50 transition-colors flex items-center gap-2"
               style="color: #007AB8; border-color: #007AB8;"
             >
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -110,7 +110,7 @@
       <!-- Oradores Inscritos no Expediente -->
       <div class="bg-white rounded-lg shadow-sm p-6">
         <h2 class="text-lg font-bold text-gray-900 mb-4">Oradores Inscritos no Expediente</h2>
-        
+
         <div v-if="sessao.speakers && sessao.speakers.length > 0" class="overflow-x-auto">
           <table class="min-w-full">
             <thead class="bg-gray-50">
@@ -125,9 +125,9 @@
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ index + 1 }}</td>
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="flex items-center gap-3">
-                    <img 
+                    <img
                       v-if="orador.user?.path_image"
-                      :src="S3_HOST + orador.user.path_image" 
+                      :src="S3_HOST + orador.user.path_image"
                       :alt="orador.user.nickname"
                       class="w-8 h-8 rounded-full object-cover"
                     />
@@ -258,32 +258,32 @@ const loading = ref(true)
 
 const formatDateTimeExtended = (dateTimeString) => {
   if (!dateTimeString) return 'Data não informada'
-  
+
   const meses = [
     'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
     'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
   ]
-  
+
   const diasSemana = [
     'Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira',
     'Quinta-feira', 'Sexta-feira', 'Sábado'
   ]
-  
+
   const data = new Date(dateTimeString)
-  
+
   const dia = data.getDate()
   const mes = meses[data.getMonth()]
   const ano = data.getFullYear()
   const diaSemana = diasSemana[data.getDay()]
   const horas = String(data.getHours()).padStart(2, '0')
   const minutos = String(data.getMinutes()).padStart(2, '0')
-  
+
   return `${dia} de ${mes} de ${ano} (${diaSemana}) às ${horas}:${minutos} horas`
 }
 
 const formatDate = (dateString) => {
   if (!dateString) return 'Não informado'
-  
+
   const date = new Date(dateString)
   return date.toLocaleDateString('pt-BR')
 }
