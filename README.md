@@ -8,10 +8,79 @@ Sistema de Apoio ao Processo Legislativo para Câmaras Municipais.
 - **Vite** - Build tool e dev server
 - **Vue Router** - Gerenciamento de rotas
 - **Pinia** - Gerenciamento de estado
+- **Axios** - Cliente HTTP para comunicação com APIs
 - **Tailwind CSS v4** - Framework CSS utilitário
 - **PostCSS** - Processamento de CSS
 
-## 📋 Funcionalidades
+## 🏢 Sistema Multi-Tenant
+
+O projeto suporta **múltiplos clientes (tenants)** baseado no subdomínio da URL:
+
+- **jc.smartlegis.net.br** → API: `jcapp.smartlegis.net.br`
+- **macaiba.smartlegis.net.br** → API: `macaibaapp.smartlegis.net.br`
+- **localhost** → Configuração de desenvolvimento
+
+Cada tenant tem suas próprias:
+- URLs de API
+- Tema personalizado (cores, logo)
+- Features habilitadas/desabilitadas
+
+📚 **[Veja o guia completo de Multi-Tenant](./MULTI_TENANT_GUIDE.md)**
+
+## 🌐 Comunicação com API
+
+O projeto usa **Axios** configurado para trabalhar com o sistema multi-tenant:
+
+- ✅ Detecção automática da API baseada no tenant
+- ✅ Autenticação automática (JWT)
+- ✅ Tratamento de erros padronizado
+- ✅ Composables Vue prontos para uso
+- ✅ Services organizados por recurso
+
+### Exemplo de Uso
+
+```javascript
+import { materiasService } from '@/services/api'
+
+// Listar matérias
+const materias = await materiasService.listar()
+
+// Criar nova matéria
+const nova = await materiasService.criar({
+  titulo: 'Projeto de Lei 123/2026',
+  tipo: 'projeto-lei'
+})
+```
+
+📚 **[Veja o guia completo de Axios](./AXIOS_GUIDE.md)**
+
+## � Autenticação
+
+O sistema possui **autenticação automática** ao iniciar a aplicação:
+
+### Fluxo Automático
+
+1. Ao carregar a página → chama `GET /api/external/access`
+2. Token retornado é salvo no `localStorage`
+3. Token é adicionado automaticamente em **todas** as requisições
+4. Formato: `Authorization: Bearer {token}`
+
+### Uso em Componentes
+
+```javascript
+import { useAuth } from '@/composables/useAuth'
+
+const { isAuthenticated, user, logout } = useAuth()
+
+// Verificar se está autenticado
+if (isAuthenticated.value) {
+  console.log('Usuário:', user.value)
+}
+```
+
+📚 **[Veja o guia completo de Autenticação](./AUTH_GUIDE.md)**
+
+## �📋 Funcionalidades
 
 O sistema inclui as seguintes seções:
 
@@ -38,8 +107,12 @@ O sistema inclui as seguintes seções:
 src/
 ├── assets/          # Estilos globais
 ├── components/      # Componentes reutilizáveis
+├── composables/     # Composables Vue (useTenant, etc)
+├── config/          # Arquivos de configuração (tenants, etc)
+├── examples/        # Exemplos de uso
 ├── router/          # Configuração de rotas
 ├── stores/          # Stores do Pinia
+├── utils/           # Funções utilitárias
 └── views/           # Páginas da aplicação
 ```
 

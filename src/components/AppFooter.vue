@@ -1,5 +1,5 @@
 <template>
-  <footer class="bg-brand-blue text-white py-4 px-6 mt-auto">
+  <footer class="bg-brand-dark-blue-legis text-white py-4 px-6 mt-auto">
     <div class="max-w-7xl mx-auto flex items-center justify-center gap-2">
       <img
         src="../assets/img/logo_legis.png"

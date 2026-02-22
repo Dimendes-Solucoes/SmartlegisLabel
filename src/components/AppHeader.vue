@@ -1,10 +1,10 @@
 <template>
-  <header class="bg-brand-blue text-white py-4 px-6">
+  <header class="bg-brand-dark-blue-legis text-white py-4 px-6">
     <div class="max-w-7xl mx-auto flex items-center justify-between">
       <div class="flex items-center gap-4">
         <img
-          src="../assets/img/natal.png"
-          alt="Brasão"
+          :src="brasao"
+          :alt="`Brasão de ${tenantName}`"
           class="h-12 w-12 object-contain"
         />
         <div>
@@ -24,14 +24,23 @@
 </template>
 
 <script setup>
-defineProps({
+import { useTenant } from '@/composables/useTenant'
+
+// Obtém informações do tenant
+const { tenantName, tenantFullName, brasao } = useTenant()
+
+// Props opcionais para sobrescrever os valores do tenant se necessário
+const props = defineProps({
   title: {
     type: String,
-    default: 'Câmara Municipal de Natal - RN'
+    default: null
   },
   subtitle: {
     type: String,
     default: 'Sistema de Apoio ao Processo Legislativo'
   }
 })
+
+// Usa o título do tenant se não for fornecido via prop
+const title = props.title || tenantFullName.value
 </script>

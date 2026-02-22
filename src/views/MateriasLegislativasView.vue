@@ -33,13 +33,17 @@
         </label>
         <div class="relative">
           <select
-            v-model="filters.tipo"
+            v-model="filters.document_category_id"
             class="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg appearance-none focus:outline-none focus:ring-2 focus:ring-brand-blue focus:border-transparent"
           >
             <option value="">Selecione</option>
-            <option value="emenda">Emenda Aditiva</option>
-            <option value="projeto">Projeto de Lei</option>
-            <option value="indicacao">Indicação</option>
+            <option
+              v-for="type in documentsTypes"
+              :key="type.id"
+              :value="type.id"
+            >
+              {{ type.name }}
+            </option>
           </select>
           <svg class="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
@@ -51,12 +55,18 @@
         <label class="block text-sm font-medium text-gray-700 mb-2">
           Ano
         </label>
-        <input
-          type="number"
-          v-model="filters.ano"
-          placeholder="2026"
-          class="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue focus:border-transparent"
-        />
+        <div class="relative">
+          <select
+            v-model="filters.year"
+            class="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg appearance-none focus:outline-none focus:ring-2 focus:ring-brand-blue focus:border-transparent"
+          >
+            <option value="">Selecione</option>
+            <option v-for="year in years" :key="year" :value="year">{{ year }}</option>
+          </select>
+          <svg class="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+          </svg>
+        </div>
       </div>
 
       <div>
@@ -65,13 +75,15 @@
         </label>
         <div class="relative">
           <select
-            v-model="filters.localizacao"
+            v-model="filters.document_status_movement_id"
             class="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg appearance-none focus:outline-none focus:ring-2 focus:ring-brand-blue focus:border-transparent"
           >
             <option value="">Selecione</option>
-            <option value="secretaria">Secretaria Legislativa</option>
-            <option value="comissao">Comissão</option>
-            <option value="plenario">Plenário</option>
+            <option value="1">Secretaria</option>
+            <option value="2">Sessão</option>
+            <option value="3">Procurador</option>
+            <option value="4">Comissão</option>
+            <option value="6">Prefeitura</option>
           </select>
           <svg class="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
@@ -137,7 +149,14 @@
     </div>
 
 
-    <div v-if="!hasSearched" class="flex flex-col items-center justify-center py-20">
+    <div v-if="loading" class="flex items-center justify-center py-20">
+      <div class="flex flex-col items-center gap-4">
+        <div class="w-12 h-12 border-4 border-gray-200 border-t-blue-600 rounded-full animate-spin"></div>
+        <p class="text-gray-600">Carregando...</p>
+      </div>
+    </div>
+
+    <div v-else-if="!hasSearched" class="flex flex-col items-center justify-center py-20">
       <img src="/images/empty-search.svg" alt="Busca vazia" class="w-64 h-64 mb-6 opacity-50" />
       <p class="text-gray-500 text-center">
         Execute uma busca para que o resultado seja carregado.
@@ -148,62 +167,67 @@
       <div
         v-for="materia in materias"
         :key="materia.id"
-        class="bg-white rounded-lg shadow-sm p-6 hover:shadow-md transition-shadow cursor-pointer"
+        class="bg-gray-100 rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow cursor-pointer"
         @click="goToMateria(materia.id)"
       >
 
         <h3 class="text-lg font-bold text-blue-600 mb-3">
-          {{ materia.titulo }}
+          {{ materia.document_category.abbreviation }}
         </h3>
 
         <p class="text-sm text-gray-700 mb-4 leading-relaxed">
-          {{ materia.ementa }}
+          {{ materia.name }}
         </p>
 
 
-        <div class="grid grid-cols-2 md:grid-cols-6 gap-4 mb-4">
+        <div class="grid grid-cols-2 md:grid-cols-7 gap-4 mb-4">
           <div>
             <p class="text-xs text-gray-500 mb-1">Protocolo</p>
-            <p class="text-sm font-medium text-gray-900">{{ materia.protocolo }}</p>
+            <p class="text-sm font-medium text-gray-900">{{ materia.id }}</p>
           </div>
           <div>
             <p class="text-xs text-gray-500 mb-1">Data de entrada</p>
-            <p class="text-sm font-medium text-gray-900">{{ materia.dataEntrada }}</p>
+            <p class="text-sm font-medium text-gray-900">{{ formatDate(materia.created_at) }}</p>
           </div>
           <div>
             <p class="text-xs text-gray-500 mb-1">Localização atual</p>
-            <p class="text-sm font-medium text-gray-900">{{ materia.localizacao }}</p>
+            <p v-if="materia.document_status_movement_id === 1" class="text-sm font-medium text-gray-900">Secretaria</p>
+            <p v-else-if="materia.document_status_movement_id === 2" class="text-sm font-medium text-gray-900">Sessão</p>
+            <p v-else-if="materia.document_status_movement_id === 3" class="text-sm font-medium text-gray-900">Procurador</p>
+            <p v-else-if="materia.document_status_movement_id === 4" class="text-sm font-medium text-gray-900">Comissão</p>
+            <p v-else-if="materia.document_status_movement_id === 5" class="text-sm font-medium text-gray-900">Sessão</p>
+            <p v-else-if="materia.document_status_movement_id === 6" class="text-sm font-medium text-gray-900">Prefeitura</p>
           </div>
           <div>
             <p class="text-xs text-gray-500 mb-1">Situação</p>
-            <p class="text-sm font-medium text-gray-900">{{ materia.situacao }}</p>
+            <p class="text-sm font-medium text-gray-900">{{ materia.document_status_vote_id }}</p>
           </div>
           <div>
             <p class="text-xs text-gray-500 mb-1">Em tramitação?</p>
-            <p class="text-sm font-medium text-gray-900">{{ materia.emTramitacao }}</p>
+            <p class="text-sm font-medium text-gray-900">{{ materia.document_status_movement_id != 6 ? 'Sim' : 'Não' }}</p>
           </div>
-          <div class="flex items-center gap-2">
-            <img :src="materia.autorFoto" :alt="materia.autor" class="w-8 h-8 rounded-full" />
-            <div>
-              <p class="text-xs text-gray-500">{{ materia.autor }}</p>
-              <p class="text-xs text-gray-400">Autor</p>
-            </div>
-          </div>
+          <div class="flex items-center gap-4">
+                <div v-for="autor in materia.authors" :key="autor" class="flex items-center gap-5 mb-1">
+                  <img
+                    v-if="autor.path_image"
+                    :src="S3_HOST + autor.path_image"
+                    :alt="autor.name"
+                    class="w-8 h-8 rounded-full object-cover"
+                  />
+                  <div v-else class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
+                    <svg class="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
+                    </svg>
+                  </div>
+                  <div>
+                    <p class="text-sm font-medium text-gray-900">{{ autor.name || 'Autor não informado' }}</p>
+                    <p class="text-xs text-gray-500">Autor</p>
+                  </div>
+                </div>
+              </div>
         </div>
 
-        <div class="flex gap-3">
-          <button class="px-4 py-2 border rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors flex items-center gap-2" style="color: #007AB8; border-color: #007AB8;">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-            </svg>
-            PLE 00/0000
-          </button>
-          <button class="px-4 py-2 border rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors flex items-center gap-2" style="color: #007AB8; border-color: #007AB8;">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-            </svg>
-            PLE 00/0000
-          </button>
+        <div class="flex gap-3 justify-end">
           <button class="px-4 py-2 rounded-lg text-sm font-medium text-white hover:opacity-90 transition-opacity" style="background-color: #007AB8;">
             <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -216,17 +240,97 @@
 
       <div class="flex items-center justify-between pt-4">
         <div class="text-sm text-gray-600">
-          Mostrando 1-3 de 3 resultados
+          Mostrando {{ startItem }}-{{ endItem }} de {{ pagination.total }} resultados
         </div>
         <div class="flex gap-2">
-          <button disabled class="px-4 py-2 text-sm font-medium text-gray-400 bg-white border border-gray-300 rounded-lg cursor-not-allowed">
+          <!-- Primeira página -->
+          <button
+            @click="goToPage(1)"
+            :disabled="pagination.currentPage === 1"
+            :class="[
+              'px-3 py-2 text-sm font-medium rounded-lg',
+              pagination.currentPage === 1
+                ? 'text-gray-400 bg-white border border-gray-300 cursor-not-allowed'
+                : 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50'
+            ]"
+            title="Primeira página"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
+            </svg>
+          </button>
+          
+          <!-- Anterior -->
+          <button
+            @click="previousPage"
+            :disabled="pagination.currentPage === 1"
+            :class="[
+              'px-4 py-2 text-sm font-medium rounded-lg',
+              pagination.currentPage === 1
+                ? 'text-gray-400 bg-white border border-gray-300 cursor-not-allowed'
+                : 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50'
+            ]"
+          >
             Anterior
           </button>
-          <button class="px-4 py-2 text-sm font-medium text-white rounded-lg" style="background-color: #003d6f;">
-            1
+          
+          <!-- Números das páginas -->
+          <button
+            v-for="page in visiblePages"
+            :key="page"
+            @click="goToPage(page)"
+            :class="[
+              'px-4 py-2 text-sm font-medium rounded-lg',
+              page === pagination.currentPage
+                ? 'text-white'
+                : 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50'
+            ]"
+            :style="page === pagination.currentPage ? 'background-color: #003d6f;' : ''"
+          >
+            {{ page }}
           </button>
-          <button disabled class="px-4 py-2 text-sm font-medium text-gray-400 bg-white border border-gray-300 rounded-lg cursor-not-allowed">
+          
+          <!-- Reticências se necessário -->
+          <span v-if="showEllipsis" class="px-3 py-2 text-gray-500">...</span>
+          
+          <!-- Última página (se não estiver visível) -->
+          <button
+            v-if="shouldShowLastPage"
+            @click="goToPage(pagination.lastPage)"
+            class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+          >
+            {{ pagination.lastPage }}
+          </button>
+          
+          <!-- Próximo -->
+          <button
+            @click="nextPage"
+            :disabled="pagination.currentPage === pagination.lastPage"
+            :class="[
+              'px-4 py-2 text-sm font-medium rounded-lg',
+              pagination.currentPage === pagination.lastPage
+                ? 'text-gray-400 bg-white border border-gray-300 cursor-not-allowed'
+                : 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50'
+            ]"
+          >
             Próximo
+          </button>
+          
+          <!-- Última página -->
+          <button
+            @click="goToPage(pagination.lastPage)"
+            :disabled="pagination.currentPage === pagination.lastPage"
+            :class="[
+              'px-3 py-2 text-sm font-medium rounded-lg',
+              pagination.currentPage === pagination.lastPage
+                ? 'text-gray-400 bg-white border border-gray-300 cursor-not-allowed'
+                : 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50'
+            ]"
+            title="Última página"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+            </svg>
           </button>
         </div>
       </div>
@@ -235,74 +339,249 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
+import { materiasService } from '@/services/api'
 
 const router = useRouter()
 
 const searchQuery = ref('')
 const hasSearched = ref(false)
+const loading = ref(false)
+const documentsTypes = ref([])
+const S3_HOST = import.meta.env.VITE_S3_HOST
+let debounceTimeout = null
+
+onMounted(() => {
+  getDocuments()
+  getTypes()
+})
 
 const filters = ref({
-  tipo: '',
-  ano: '',
-  localizacao: '',
+  document_category_id: '',
+  year: '',
+  document_status_movement_id: '',
   situacao: ''
 })
 
-const materias = ref([
-  {
-    id: 1,
-    titulo: 'EA 12/2025 - EMENDA ADITIVA A PROJETO',
-    ementa: 'EMENDA ADITIVA DO PARÁGRAFO ÚNICO DO ARTIGO 9 PROJETO DE LEI COMPLEMENTAR Nº 48, DE 09 DE DEZEMBRO DE 2025, QUE INSTITUI A POLÍTICA DE DESAFETAÇÃO E ALIENAÇÃO DE BENS IMÓVEIS PÚBLICOS MUNICIPAIS PARA FINS DE PERMUTA OU DOAÇÃO COM ENCARGO VOLTADOS À IMPLANTAÇÃO DE EQUIPAMENTOS PÚBLICOS, E DÁ OUTRAS PROVIDÊNCIAS.',
-    protocolo: 'AAAAA/2026',
-    dataEntrada: '22/01/2022',
-    localizacao: 'Secretaria legislativa',
-    situacao: 'Rejeitado',
-    emTramitacao: 'Sim',
-    autor: 'Tiago P. Soares',
-    autorFoto: '/images/member-placeholder.jpg'
-  },
-  {
-    id: 2,
-    titulo: 'EA 12/2025 - EMENDA ADITIVA A PROJETO',
-    ementa: 'EMENDA ADITIVA DO PARÁGRAFO ÚNICO DO ARTIGO 9 PROJETO DE LEI COMPLEMENTAR Nº 48, DE 09 DE DEZEMBRO DE 2025, QUE INSTITUI A POLÍTICA DE DESAFETAÇÃO E ALIENAÇÃO DE BENS IMÓVEIS PÚBLICOS MUNICIPAIS PARA FINS DE PERMUTA OU DOAÇÃO COM ENCARGO VOLTADOS À IMPLANTAÇÃO DE EQUIPAMENTOS PÚBLICOS, E DÁ OUTRAS PROVIDÊNCIAS.',
-    protocolo: 'AAAAA/2026',
-    dataEntrada: '22/01/2022',
-    localizacao: 'Secretaria legislativa',
-    situacao: 'Rejeitado',
-    emTramitacao: 'Sim',
-    autor: 'Tiago P. Soares',
-    autorFoto: '/images/member-placeholder.jpg'
-  },
-  {
-    id: 3,
-    titulo: 'EA 12/2025 - EMENDA ADITIVA A PROJETO',
-    ementa: 'EMENDA ADITIVA DO PARÁGRAFO ÚNICO DO ARTIGO 9 PROJETO DE LEI COMPLEMENTAR Nº 48, DE 09 DE DEZEMBRO DE 2025, QUE INSTITUI A POLÍTICA DE DESAFETAÇÃO E ALIENAÇÃO DE BENS IMÓVEIS PÚBLICOS MUNICIPAIS PARA FINS DE PERMUTA OU DOAÇÃO COM ENCARGO VOLTADOS À IMPLANTAÇÃO DE EQUIPAMENTOS PÚBLICOS, E DÁ OUTRAS PROVIDÊNCIAS.',
-    protocolo: 'AAAAA/2026',
-    dataEntrada: '22/01/2022',
-    localizacao: 'Secretaria legislativa',
-    situacao: 'Rejeitado',
-    emTramitacao: 'Sim',
-    autor: 'Tiago P. Soares',
-    autorFoto: '/images/member-placeholder.jpg'
+const pagination = ref({
+  currentPage: 1,
+  lastPage: 1,
+  perPage: 10,
+  total: 0
+})
+
+const startItem = computed(() => {
+  if (pagination.value.total === 0) return 0
+  return (pagination.value.currentPage - 1) * pagination.value.perPage + 1
+})
+
+const endItem = computed(() => {
+  const end = pagination.value.currentPage * pagination.value.perPage
+  return end > pagination.value.total ? pagination.value.total : end
+})
+
+// Gera lista de anos de 2000 a 2030
+const years = computed(() => {
+  const currentYear = new Date().getFullYear()
+  const startYear = 2000
+  const endYear = currentYear + 5 // 5 anos no futuro
+  const yearList = []
+  
+  for (let year = endYear; year >= startYear; year--) {
+    yearList.push(year)
   }
-])
+  
+  return yearList
+})
+
+// Calcula as páginas visíveis (atual + até 3 para frente)
+const visiblePages = computed(() => {
+  const pages = []
+  const current = pagination.value.currentPage
+  const last = pagination.value.lastPage
+  
+  // Adiciona página atual
+  pages.push(current)
+  
+  // Adiciona até 3 páginas para frente
+  for (let i = 1; i <= 3 && current + i <= last; i++) {
+    pages.push(current + i)
+  }
+  
+  return pages
+})
+
+// Verifica se deve mostrar reticências
+const showEllipsis = computed(() => {
+  const lastVisible = visiblePages.value[visiblePages.value.length - 1]
+  return lastVisible < pagination.value.lastPage - 1
+})
+
+// Verifica se deve mostrar botão da última página separado
+const shouldShowLastPage = computed(() => {
+  const lastVisible = visiblePages.value[visiblePages.value.length - 1]
+  return lastVisible < pagination.value.lastPage
+})
+
+const materias = ref([])
+
+const scrollToTop = () => {
+  window.scrollTo({ top: 0, behavior: 'smooth' })
+}
+
+const getTypes = async () => {
+  try {
+    const response = await materiasService.getTypes()
+    documentsTypes.value = response.data
+  } catch (error) {
+    console.error('Erro ao buscar tipos de matéria:', error)
+    return []
+  }
+}
+
+const getDocuments = async (page = 1) => {
+  try {
+    loading.value = true
+    const params = {
+      page,
+      per_page: pagination.value.perPage
+    }
+    
+    // Adicionar filtros apenas se tiverem valor
+    if (searchQuery.value) {
+      params.name = searchQuery.value
+    }
+    if (filters.value.document_category_id) {
+      params.document_category_id = filters.value.document_category_id
+    }
+    if (filters.value.year) {
+      params.year = filters.value.year
+    }
+    if (filters.value.document_status_movement_id) {
+      params.document_status_movement_id = filters.value.document_status_movement_id
+    }
+    
+    // Mapear situação para os parâmetros corretos
+    if (filters.value.situacao) {
+      if (filters.value.situacao === 'aprovado') {
+        params.is_approved = true
+      } else if (filters.value.situacao === 'rejeitado') {
+        params.is_approved = false
+      } else if (filters.value.situacao === 'tramitacao') {
+        params.document_status_movement_id = 2
+      }
+    }
+    
+    const response = await materiasService.get(params)
+    console.log('Detalhes das matérias:', response)
+    
+    materias.value = response.data
+    pagination.value = {
+      currentPage: response.current_page,
+      lastPage: response.last_page,
+      perPage: response.per_page,
+      total: response.total
+    }
+    hasSearched.value = true
+  } catch (error) {
+    console.error('Erro ao buscar matérias:', error)
+    materias.value = []
+  } finally {
+    loading.value = false
+  }
+}
+
+// Watch para o campo de busca (com debounce)
+watch(() => searchQuery.value, () => {
+  if (debounceTimeout) {
+    clearTimeout(debounceTimeout)
+  }
+  debounceTimeout = setTimeout(() => {
+    if (hasSearched.value || searchQuery.value) {
+      getDocuments(1)
+    }
+  }, 500)
+})
+
+// Watch para os filtros (sem debounce)
+watch(
+  () => [filters.value.document_category_id, filters.value.year, filters.value.document_status_movement_id, filters.value.situacao],
+  () => {
+    if (hasSearched.value) {
+      getDocuments(1)
+    }
+  }
+)
+
+const previousPage = () => {
+  if (pagination.value.currentPage > 1) {
+    scrollToTop()
+    getDocuments(pagination.value.currentPage - 1)
+  }
+}
+
+const nextPage = () => {
+  if (pagination.value.currentPage < pagination.value.lastPage) {
+    scrollToTop()
+    getDocuments(pagination.value.currentPage + 1)
+  }
+}
+
+const goToPage = (page) => {
+  if (page !== pagination.value.currentPage && page >= 1 && page <= pagination.value.lastPage) {
+    scrollToTop()
+    getDocuments(page)
+  }
+}
+
+const formatDateTimeExtended = (dateTimeString) => {
+  if (!dateTimeString) return 'Data não informada'
+  
+  const meses = [
+    'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+    'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+  ]
+  
+  const diasSemana = [
+    'Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira',
+    'Quinta-feira', 'Sexta-feira', 'Sábado'
+  ]
+  
+  const data = new Date(dateTimeString)
+  
+  const dia = data.getDate()
+  const mes = meses[data.getMonth()]
+  const ano = data.getFullYear()
+  const diaSemana = diasSemana[data.getDay()]
+  const horas = String(data.getHours()).padStart(2, '0')
+  const minutos = String(data.getMinutes()).padStart(2, '0')
+  
+  return `${dia} de ${mes} de ${ano} (${diaSemana}) às ${horas}:${minutos} horas`
+}
+
+const formatDate = (dateString) => {
+  if (!dateString) return 'Não informado'
+  
+  const date = new Date(dateString)
+  return date.toLocaleDateString('pt-BR')
+}
+
 
 const handleSearch = () => {
-  hasSearched.value = true
-  console.log('Buscando materias:', searchQuery.value)
+  getDocuments(1)
 }
 
 const clearFilters = () => {
   searchQuery.value = ''
   filters.value = {
-    tipo: '',
-    ano: '',
-    localizacao: '',
+    document_category_id: '',
+    year: '',
+    document_status_movement_id: '',
     situacao: ''
   }
   hasSearched.value = false
+  getDocuments(1)
 }
 
 const goToMateria = (id) => {

@@ -1,6 +1,6 @@
 <template>
   <div
-    class="relative bg-brand-blue rounded-3xl overflow-hidden shadow-lg transition-all duration-300 hover:shadow-2xl group cursor-pointer h-64"
+    class="relative bg-brand-dark-blue-legis rounded-3xl overflow-hidden shadow-lg transition-all duration-300 hover:shadow-2xl group cursor-pointer h-64"
     @click="handleClick"
   >
     <div class="absolute inset-0 flex items-center justify-center p-8">
@@ -21,7 +21,7 @@
       </div>
 
       <div
-        class="absolute inset-0 bg-brand-blue/95 p-6 flex flex-col justify-between opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+        class="absolute inset-0 bg-brand-dark-blue-legis/95 p-6 flex flex-col justify-between opacity-0 group-hover:opacity-100 transition-opacity duration-300"
       >
         <div>
           <h3 class="text-white text-2xl font-bold mb-4 leading-tight">

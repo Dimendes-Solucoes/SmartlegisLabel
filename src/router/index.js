@@ -3,9 +3,11 @@ import HomeView from '@/views/HomeView.vue'
 import MesaDiretoraView from '@/views/MesaDiretoraView.vue'
 import ComissoesView from '@/views/ComissoesView.vue'
 import ParlamentaresView from '@/views/ParlamentaresView.vue'
+import ParlamentarDetalheView from '@/views/ParlamentarDetalheView.vue'
 import PautasSessoesView from '@/views/PautasSessoesView.vue'
 import PautaDetalheView from '@/views/PautaDetalheView.vue'
 import SessaoPlenariaView from '@/views/SessaoPlenariaView.vue'
+import SessaoDetalhesView from '@/views/SessaoDetalhesView.vue'
 import SessaoDetalheView from '@/views/SessaoDetalheView.vue'
 import MateriasLegislativasView from '@/views/MateriasLegislativasView.vue'
 import MateriaDetalheView from '@/views/MateriaDetalheView.vue'
@@ -37,6 +39,11 @@ const router = createRouter({
       component: ParlamentaresView
     },
     {
+      path: '/parlamentares/:id',
+      name: 'parlamentar-detalhe',
+      component: ParlamentarDetalheView
+    },
+    {
       path: '/pautas-sessoes',
       name: 'pautas-sessoes',
       component: PautasSessoesView
@@ -50,6 +57,11 @@ const router = createRouter({
       path: '/sessao-plenaria',
       name: 'sessao-plenaria',
       component: SessaoPlenariaView
+    },
+    {
+      path: '/sessao-plenaria/:id',
+      name: 'sessao-detalhes',
+      component: SessaoDetalhesView
     },
     {
       path: '/sessao-plenaria/:id/votacao',

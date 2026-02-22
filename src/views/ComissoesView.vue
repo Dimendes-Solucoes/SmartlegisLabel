@@ -156,7 +156,7 @@
           :class="[
             'px-4 py-2 text-sm font-medium rounded-lg',
             currentPage === page
-              ? 'bg-brand-blue text-white'
+              ? 'bg-brand-dark-blue-legis text-white'
               : 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50'
           ]"
         >
@@ -176,8 +176,9 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { comissoesService } from '@/services/api'
 
 const router = useRouter()
 
@@ -186,6 +187,23 @@ const selectedSituacao = ref('')
 const showExtintas = ref(false)
 const currentPage = ref(1)
 const perPage = ref(10)
+
+const getComissoes = async () => {
+  try {
+    const response = await comissoesService.listar({
+      search: searchQuery.value,
+      situacao: selectedSituacao.value,
+      showExtintas: showExtintas.value
+    })
+    comissoes.value = response.data
+  } catch (error) {
+    console.error('Erro ao buscar comissões:', error)
+  }
+}
+
+onMounted(() => {
+  getComissoes()
+})
 
 const comissoes = ref([
   { id: 1, nome: 'Comissão de Saúde, Seguridade e Bem-Estar', sigla: 'AAAAA', situacao: 'Ativo' },

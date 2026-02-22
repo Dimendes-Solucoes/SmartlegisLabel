@@ -43,13 +43,6 @@
               class="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue focus:border-transparent"
             />
           </div>
-          <button
-            @click="handleSearch"
-            class="px-6 py-2.5 text-white rounded-lg font-medium hover:opacity-90 transition-opacity"
-            style="background-color: #007AB8;"
-          >
-            Buscar
-          </button>
         </div>
       </div>
 
@@ -62,9 +55,14 @@
             v-model="selectedLegislatura"
             class="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg appearance-none focus:outline-none focus:ring-2 focus:ring-brand-blue focus:border-transparent"
           >
-            <option value="20">20º (0000 a 0000) - Atual</option>
-            <option value="19">19º (0000 a 0000)</option>
-            <option value="18">18º (0000 a 0000)</option>
+            <option value="">Selecione</option>
+            <option
+              v-for="legislatura in legislaturas"
+              :key="legislatura.id"
+              :value="legislatura.id"
+            >
+              {{ legislatura.title }}
+            </option>
           </select>
           <svg class="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
@@ -82,10 +80,13 @@
             class="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg appearance-none focus:outline-none focus:ring-2 focus:ring-brand-blue focus:border-transparent"
           >
             <option value="">Selecione</option>
-            <option value="MDB">MDB</option>
-            <option value="PT">PT</option>
-            <option value="PSDB">PSDB</option>
-            <option value="PP">PP</option>
+            <option
+              v-for="partido in partidos"
+              :key="partido.id"
+              :value="partido.id"
+            >
+              {{ partido.name_party }}
+            </option>
           </select>
           <svg class="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
@@ -104,25 +105,26 @@
       >
         <div class="flex-shrink-0">
           <img
-            :src="parlamentar.photo || '/images/member-placeholder.jpg'"
-            :alt="parlamentar.name"
+            :src="parlamentar.path_image ? S3_HOST + parlamentar.path_image : '/images/member-placeholder.jpg'"
+            :alt="parlamentar.nickname"
             class="w-20 h-20 rounded-full object-cover"
           />
         </div>
 
         <div class="flex-1">
           <h3 class="text-base font-semibold text-gray-800 mb-2">
-            {{ parlamentar.name }}
+            {{ parlamentar.nickname }}
           </h3>
           <span class="px-3 py-1 text-xs font-medium rounded-full inline-block" style="background-color: rgba(0, 122, 184, 0.15); color: #007AB8;">
-            {{ parlamentar.party }}
+            {{ parlamentar?.category_party?.name_party || 'Partido não informado' }}
           </span>
         </div>
 
         <div class="flex-shrink-0">
           <img
-            :src="parlamentar.partyLogo || '/images/party-mdb.png'"
-            :alt="`Logo ${parlamentar.party}`"
+            v-if="parlamentar?.category_party?.logo || ''"
+            :src="S3_HOST + (parlamentar.category_party?.logo || '')"
+            :alt="`Logo ${parlamentar.category_party?.[0]?.name_party || parlamentar.party}`"
             class="h-12 object-contain"
           />
         </div>
@@ -132,79 +134,82 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
+import { parlamentaresService, partidosService, legislaturasService } from '@/services/api'
 
 const router = useRouter()
+const S3_HOST = import.meta.env.VITE_S3_HOST
 
 const searchQuery = ref('')
-const selectedLegislatura = ref('20')
+const selectedLegislatura = ref('')
 const selectedPartido = ref('')
 
-const parlamentares = ref([
-  {
-    id: 1,
-    name: 'Tiago Pereira Agnaldo Silvestre Soares',
-    party: 'MDB',
-    photo: '/images/member-placeholder.jpg',
-    partyLogo: '/images/party-mdb.png'
-  },
-  {
-    id: 2,
-    name: 'Tiago Pereira Agnaldo Silvestre Soares',
-    party: 'MDB',
-    photo: '/images/member-placeholder.jpg',
-    partyLogo: '/images/party-mdb.png'
-  },
-  {
-    id: 3,
-    name: 'Tiago Pereira Agnaldo Silvestre Soares',
-    party: 'MDB',
-    photo: '/images/member-placeholder.jpg',
-    partyLogo: '/images/party-mdb.png'
-  },
-  {
-    id: 4,
-    name: 'Tiago Pereira Agnaldo Silvestre Soares',
-    party: 'MDB',
-    photo: '/images/member-placeholder.jpg',
-    partyLogo: '/images/party-mdb.png'
-  },
-  {
-    id: 5,
-    name: 'Tiago Pereira Agnaldo Silvestre Soares',
-    party: 'MDB',
-    photo: '/images/member-placeholder.jpg',
-    partyLogo: '/images/party-mdb.png'
-  },
-  {
-    id: 6,
-    name: 'Tiago Pereira Agnaldo Silvestre Soares',
-    party: 'MDB',
-    photo: '/images/member-placeholder.jpg',
-    partyLogo: '/images/party-mdb.png'
-  },
-  {
-    id: 7,
-    name: 'Tiago Pereira Agnaldo Silvestre Soares',
-    party: 'MDB',
-    photo: '/images/member-placeholder.jpg',
-    partyLogo: '/images/party-mdb.png'
-  },
-  {
-    id: 8,
-    name: 'Tiago Pereira Agnaldo Silvestre Soares',
-    party: 'MDB',
-    photo: '/images/member-placeholder.jpg',
-    partyLogo: '/images/party-mdb.png'
-  }
-])
+const todosParlamentares = ref([])
+const partidos = ref([])
+const legislaturas = ref([])
+const parlamentares = computed(() => {
+  let resultado = todosParlamentares.value
 
-const handleSearch = () => {
-  console.log('Buscando:', searchQuery.value)
+  if (searchQuery.value) {
+    const query = searchQuery.value.toLowerCase()
+    resultado = resultado.filter(p => 
+      p.nickname?.toLowerCase().includes(query)
+    )
+  }
+
+  if (selectedLegislatura.value) {
+    resultado = resultado.filter(p => 
+      p.legislatures?.some(leg => leg.id === parseInt(selectedLegislatura.value))
+    )
+  }
+
+  if (selectedPartido.value) {
+    resultado = resultado.filter(p => 
+      p.category_party?.id === parseInt(selectedPartido.value)
+    )
+  }
+
+  return resultado
+})
+
+onMounted(() => {
+  getParlamentares()
+  getPartidos()
+  getLegislaturas()
+})
+
+const getLegislaturas = async () => {
+  try {
+    const response = await legislaturasService.get()
+    legislaturas.value = response.data
+  } catch (error) {
+    console.error('Erro ao buscar legislaturas:', error)
+  }
+}
+
+const getPartidos = async () => {
+  try {
+    const response = await partidosService.get()
+    partidos.value = response.data
+  } catch (error) {
+    console.error('Erro ao buscar partidos:', error)
+  }
+}
+
+const getParlamentares = async () => {
+  try {
+    const response = await parlamentaresService.get()
+    todosParlamentares.value = response.users.filter(user => {
+      const status = user.status_user
+      return status === 1
+    })
+  } catch (error) {
+    console.error('Erro ao buscar parlamentares:', error)
+  }
 }
 
 const goToParlamentar = (id) => {
-  console.log('Detalhes do parlamentar:', id)
+  router.push({ name: 'parlamentar-detalhe', params: { id } })
 }
 </script>
