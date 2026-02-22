@@ -1,5 +1,6 @@
 import axios from 'axios'
 import { useTenantStore } from '@/stores/tenant'
+import { convertToS3Url } from '@/utils/image-url'
 
 /**
  * Instância configurada do Axios
@@ -56,7 +57,60 @@ api.interceptors.request.use(
 /**
  * Interceptor de Resposta
  * Trata erros comuns e extrai dados da resposta
+ * Converte URLs de imagens para S3 automaticamente
  */
+
+/**
+ * Converte URLs de imagens para S3 em um objeto ou array recursivamente
+ * @param {*} data - Dados a serem processados
+ * @param {Array} imageFields - Campos que contêm URLs de imagens
+ * @returns {*} - Dados processados
+ */
+function convertImageUrls(data, imageFields = ['foto', 'imagem', 'image', 'brasao', 'url_foto', 'avatar', 'thumbnail', 'banner']) {
+  if (!data) return data
+  
+  // Se for um array, processa cada item
+  if (Array.isArray(data)) {
+    return data.map(item => convertImageUrls(item, imageFields))
+  }
+  
+  // Se for um objeto, processa cada propriedade
+  if (typeof data === 'object') {
+    const converted = {}
+    
+    for (const [key, value] of Object.entries(data)) {
+      // Se a propriedade é um campo de imagem e o valor é uma string
+      if (imageFields.includes(key) && typeof value === 'string') {
+        const originalUrl = value
+        const convertedUrl = convertToS3Url(value)
+        
+        // Log da conversão em desenvolvimento
+        if (import.meta.env.DEV && originalUrl !== convertedUrl) {
+          console.log(`🔄 Campo '${key}' convertido:`, {
+            de: originalUrl,
+            para: convertedUrl
+          })
+        }
+        
+        converted[key] = convertedUrl
+      }
+      // Se o valor é um objeto ou array, processa recursivamente
+      else if (typeof value === 'object' && value !== null) {
+        converted[key] = convertImageUrls(value, imageFields)
+      }
+      // Caso contrário, mantém o valor original
+      else {
+        converted[key] = value
+      }
+    }
+    
+    return converted
+  }
+  
+  // Retorna o valor como está se não for array nem objeto
+  return data
+}
+
 api.interceptors.response.use(
   (response) => {
     // Log em modo de desenvolvimento
@@ -68,8 +122,16 @@ api.interceptors.response.use(
       })
     }
     
-    // Retorna apenas os dados da resposta
-    return response.data
+    // Converte URLs de imagens para S3
+    const convertedData = convertImageUrls(response.data)
+    
+    // Log da conversão em modo de desenvolvimento
+    if (import.meta.env.DEV && convertedData !== response.data) {
+      console.log('🔄 URLs de imagens convertidas para S3')
+    }
+    
+    // Retorna os dados convertidos
+    return convertedData
   },
   (error) => {
     // Tratamento de erros baseado no status HTTP
