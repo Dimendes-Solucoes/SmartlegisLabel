@@ -26,14 +26,14 @@
       </div>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-6">
       <div>
         <label class="block text-sm font-medium text-gray-700 mb-2">
           Tipo de matéria
         </label>
         <div class="relative">
           <select
-            v-model="filters.document_category_id"
+            v-model.number="filters.document_category_id"
             class="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg appearance-none focus:outline-none focus:ring-2 focus:ring-brand-blue focus:border-transparent"
           >
             <option value="">Selecione</option>
@@ -57,7 +57,7 @@
         </label>
         <div class="relative">
           <select
-            v-model="filters.year"
+            v-model.number="filters.year"
             class="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg appearance-none focus:outline-none focus:ring-2 focus:ring-brand-blue focus:border-transparent"
           >
             <option value="">Selecione</option>
@@ -75,15 +75,15 @@
         </label>
         <div class="relative">
           <select
-            v-model="filters.document_status_movement_id"
+            v-model.number="filters.document_status_movement_id"
             class="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg appearance-none focus:outline-none focus:ring-2 focus:ring-brand-blue focus:border-transparent"
           >
             <option value="">Selecione</option>
-            <option value="1">Secretaria</option>
-            <option value="2">Sessão</option>
-            <option value="3">Procurador</option>
-            <option value="4">Comissão</option>
-            <option value="6">Prefeitura</option>
+            <option :value="1">Secretaria</option>
+            <option :value="2">Sessão</option>
+            <option :value="3">Procurador</option>
+            <option :value="4">Comissão</option>
+            <option :value="6">Prefeitura</option>
           </select>
           <svg class="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
@@ -104,6 +104,30 @@
             <option value="rejeitado">Rejeitado</option>
             <option value="tramitacao">Em tramitação</option>
             <option value="aprovado">Aprovado</option>
+          </select>
+          <svg class="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+          </svg>
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">
+          Parlamentar
+        </label>
+        <div class="relative">
+          <select
+            v-model.number="filters.author_id"
+            class="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg appearance-none focus:outline-none focus:ring-2 focus:ring-brand-blue focus:border-transparent"
+          >
+            <option value="">Selecione</option>
+            <option
+              v-for="parlamentar in parlamentares"
+              :key="parlamentar.id"
+              :value="parlamentar.id"
+            >
+              {{ parlamentar.name }}
+            </option>
           </select>
           <svg class="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
@@ -198,7 +222,7 @@
           </div>
           <div>
             <p class="text-xs text-gray-500 mb-1">Situação</p>
-            <p class="text-sm font-medium text-gray-900">{{ materia.document_status_vote_id }}</p>
+            <p class="text-sm font-medium text-gray-900">{{ getSituacao(materia.voting_result_1, materia.voting_result_2) }}</p>
           </div>
           <div>
             <p class="text-xs text-gray-500 mb-1">Em tramitação?</p>
@@ -226,14 +250,22 @@
         </div>
 
         <div class="flex gap-3 justify-end">
-          <button class="px-4 py-2 rounded-lg text-sm font-medium text-white hover:opacity-90 transition-opacity" style="background-color: #007AB8;">
-            <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <a 
+            :href="S3_HOST + materia.attachment" 
+            target="_blank"
+            download
+            @click.stop
+            class="px-4 py-2 rounded-lg text-sm font-medium text-white hover:opacity-90 transition-opacity inline-flex items-center"
+            style="background-color: #007AB8;"
+          >
+            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
             Matéria em PDF
-          </button>
+          </a>
         </div>
       </div>
+      
 
       <div class="flex items-center justify-between pt-4">
         <div class="text-sm text-gray-600">
@@ -338,7 +370,7 @@
 <script setup>
 import { ref, onMounted, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import { materiasService } from '@/services/api'
+import { materiasService, parlamentaresService } from '@/services/api'
 
 const router = useRouter()
 
@@ -346,19 +378,22 @@ const searchQuery = ref('')
 const hasSearched = ref(false)
 const loading = ref(false)
 const documentsTypes = ref([])
+const parlamentares = ref([])
 const S3_HOST = import.meta.env.VITE_S3_HOST
 let debounceTimeout = null
 
 onMounted(() => {
   getDocuments()
   getTypes()
+  getParlamentares()
 })
 
 const filters = ref({
   document_category_id: '',
   year: '',
   document_status_movement_id: '',
-  situacao: ''
+  situacao: '',
+  author_id: ''
 })
 
 const pagination = ref({
@@ -431,9 +466,23 @@ const getTypes = async () => {
   }
 }
 
+const getParlamentares = async () => {
+  try {
+    const response = await parlamentaresService.get()
+    parlamentares.value = response.users.filter(user => {
+      const status = user.status_user
+      return status === 1
+    })
+  } catch (error) {
+    console.error('Erro ao buscar parlamentares:', error)
+  }
+}
+
 const getDocuments = async (page = 1) => {
   try {
     loading.value = true
+    console.log('Valores dos filtros:', filters.value)
+    
     const params = {
       page,
       per_page: pagination.value.perPage
@@ -454,14 +503,18 @@ const getDocuments = async (page = 1) => {
 
     if (filters.value.situacao) {
       if (filters.value.situacao === 'aprovado') {
-        params.is_approved = true
+        params.voting_result = 1
       } else if (filters.value.situacao === 'rejeitado') {
-        params.is_approved = false
-      } else if (filters.value.situacao === 'tramitacao') {
-        params.document_status_movement_id = 2
+        params.voting_result = 2
       }
+      // Em tramitação: não adiciona filtro
+    }
+    if (filters.value.author_id) {
+      params.authors = [Number(filters.value.author_id)]
+      console.log('📋 Authors array:', params.authors)
     }
 
+    console.log('Parâmetros enviados para API:', params)
     const response = await materiasService.get(params)
     console.log('Detalhes das matérias:', response)
 
@@ -493,7 +546,7 @@ watch(() => searchQuery.value, () => {
 })
 
 watch(
-  () => [filters.value.document_category_id, filters.value.year, filters.value.document_status_movement_id, filters.value.situacao],
+  () => [filters.value.document_category_id, filters.value.year, filters.value.document_status_movement_id, filters.value.situacao, filters.value.author_id],
   () => {
     if (hasSearched.value) {
       getDocuments(1)
@@ -554,6 +607,41 @@ const formatDate = (dateString) => {
   return date.toLocaleDateString('pt-BR')
 }
 
+const getSituacao = (voting_result_1, voting_result_2) => {
+  // Se ambos são null → Em tramitação
+  if (voting_result_1 === null && voting_result_2 === null) {
+    return 'Em tramitação'
+  }
+  
+  // Se apenas voting_result_1 = 1 → Aprovado
+  if (voting_result_1 === 1 && (voting_result_2 === null || voting_result_2 === undefined)) {
+    return 'Aprovado'
+  }
+  
+  // Se apenas voting_result_1 = 2 → Rejeitado
+  if (voting_result_1 === 2 && (voting_result_2 === null || voting_result_2 === undefined)) {
+    return 'Rejeitado'
+  }
+  
+  // Se voting_result_1 = 1 e voting_result_2 = 1 → Aprovado
+  if (voting_result_1 === 1 && voting_result_2 === 1) {
+    return 'Aprovado'
+  }
+  
+  // Se voting_result_1 = 2 e voting_result_2 = 2 → Rejeitado
+  if (voting_result_1 === 2 && voting_result_2 === 2) {
+    return 'Rejeitado'
+  }
+  
+  // Se voting_result_1 = 1 e voting_result_2 = 2 → Indefinido (tratado como Em tramitação)
+  // Se voting_result_1 = 2 e voting_result_2 = 1 → Indefinido (tratado como Em tramitação)
+  if ((voting_result_1 === 1 && voting_result_2 === 2) || (voting_result_1 === 2 && voting_result_2 === 1)) {
+    return 'Em tramitação'
+  }
+  
+  return 'Em tramitação'
+}
+
 const handleSearch = () => {
   getDocuments(1)
 }
@@ -564,7 +652,8 @@ const clearFilters = () => {
     document_category_id: '',
     year: '',
     document_status_movement_id: '',
-    situacao: ''
+    situacao: '',
+    author_id: ''
   }
   hasSearched.value = false
   getDocuments(1)

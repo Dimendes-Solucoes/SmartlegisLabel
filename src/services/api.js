@@ -4,7 +4,22 @@ import { saveToken, removeToken } from '@/utils/auth-token'
 export class MateriasService {
 
   async get(filtros = {}) {
-    return await api.get('/external/documents', { params: filtros })
+    // Remove parâmetros vazios, null ou undefined
+    const cleanParams = Object.entries(filtros).reduce((acc, [key, value]) => {
+      if (value !== '' && value !== null && value !== undefined) {
+        acc[key] = value
+      }
+      return acc
+    }, {})
+    
+    // Serializa authors como JSON array
+    if (cleanParams.authors && Array.isArray(cleanParams.authors)) {
+      cleanParams.authors = JSON.stringify(cleanParams.authors)
+    }
+    
+    console.log('📤 Parâmetros enviados para /external/documents:', cleanParams)
+    
+    return await api.get('/external/documents', { params: cleanParams })
   }
 
   async getTypes() {
