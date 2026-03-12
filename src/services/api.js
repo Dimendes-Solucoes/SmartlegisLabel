@@ -77,82 +77,35 @@ export class SessoesService {
 }
 
 export class ComissoesService {
-  async listar() {
-    return await api.get('/comissoes')
+  async get() {
+    return await api.get('/external/comissions')
   }
 
-  async buscarPorId(id) {
-    return await api.get(`/comissoes/${id}`)
-  }
-
-  async criar(dados) {
-    return await api.post('/comissoes', dados)
-  }
-
-  async atualizar(id, dados) {
-    return await api.put(`/comissoes/${id}`, dados)
-  }
-
-  async deletar(id) {
-    return await api.delete(`/comissoes/${id}`)
-  }
-
-  async adicionarMembro(comissaoId, parlamentarId, cargo) {
-    return await api.post(`/comissoes/${comissaoId}/membros`, {
-      parlamentarId,
-      cargo
-    })
-  }
-
-  async removerMembro(comissaoId, parlamentarId) {
-    return await api.delete(`/comissoes/${comissaoId}/membros/${parlamentarId}`)
-  }
 }
 
 export class MesaDiretoraService {
-  async buscar() {
-    return await api.get('/mesa-diretora')
-  }
-
-  async atualizar(dados) {
-    return await api.put('/mesa-diretora', dados)
-  }
-
-  async adicionarMembro(parlamentarId, cargo) {
-    return await api.post('/mesa-diretora/membros', {
-      parlamentarId,
-      cargo
-    })
-  }
-
-  async removerMembro(parlamentarId) {
-    return await api.delete(`/mesa-diretora/membros/${parlamentarId}`)
+  async get() {
+    return await api.get('/external/board-directors')
   }
 }
 
 export class NormasService {
-  async listar(filtros = {}) {
-    return await api.get('/normas', { params: filtros })
+  async get(filtros = {}) {
+    const cleanParams = Object.entries(filtros).reduce((acc, [key, value]) => {
+      if (value !== '' && value !== null && value !== undefined) {
+        acc[key] = value
+      }
+      return acc
+    }, {})
+    return await api.get('/external/legal-norms', { params: cleanParams })
   }
 
-  async buscarPorId(id) {
-    return await api.get(`/normas/${id}`)
+  async getTypes() {
+    return await api.get('/external/norm-types')
   }
 
-  async criar(dados) {
-    return await api.post('/normas', dados)
-  }
-
-  async atualizar(id, dados) {
-    return await api.put(`/normas/${id}`, dados)
-  }
-
-  async deletar(id) {
-    return await api.delete(`/normas/${id}`)
-  }
-
-  async publicar(id) {
-    return await api.post(`/normas/${id}/publicar`)
+  async getSubjects() {
+    return await api.get('/external/norm-subjects')
   }
 }
 

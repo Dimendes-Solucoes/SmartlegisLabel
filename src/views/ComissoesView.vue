@@ -26,85 +26,31 @@
       </div>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6 items-end">
-      <div class="md:col-span-1">
-        <label class="block text-sm font-medium text-gray-700 mb-2">
-          Buscar
-        </label>
-        <div class="flex gap-2">
-          <div class="relative flex-1">
-            <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-            <input
-              type="text"
-              v-model="searchQuery"
-              placeholder="Busque pela comissão ou sigla..."
-              class="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue focus:border-transparent"
-            />
-          </div>
-          <button
-            @click="handleSearch"
-            class="px-6 py-2.5 text-white rounded-lg font-medium hover:opacity-90 transition-opacity"
-            style="background-color: #007AB8;"
-          >
-            Buscar
-          </button>
-        </div>
-      </div>
-
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-2">
-          Situação
-        </label>
-        <div class="relative">
-          <select
-            v-model="selectedSituacao"
-            class="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg appearance-none focus:outline-none focus:ring-2 focus:ring-brand-blue focus:border-transparent"
-          >
-            <option value="">Selecione</option>
-            <option value="ativo">Ativo</option>
-            <option value="inativo">Inativo</option>
-          </select>
-          <svg class="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-          </svg>
-        </div>
-      </div>
-
-      <div>
-        <label class="flex items-center gap-2 cursor-pointer">
-          <input
-            type="checkbox"
-            v-model="showExtintas"
-            class="w-5 h-5 rounded border-gray-300 text-blue-600 focus:ring-2 focus:ring-blue-500"
-          />
-          <span class="text-sm font-medium text-gray-700">
-            Exibir comissões extintas?
-          </span>
-        </label>
-      </div>
-    </div>
-
     <div class="bg-white rounded-lg shadow-sm overflow-hidden mb-6">
-      <div class="grid grid-cols-12 gap-4 px-6 py-3 bg-gray-100 border-b border-gray-200">
-        <div class="col-span-5 text-sm font-medium text-gray-700">Comissão</div>
-        <div class="col-span-3 text-sm font-medium text-gray-700">Sigla</div>
-        <div class="col-span-3 text-sm font-medium text-gray-700">Situação</div>
-        <div class="col-span-1"></div>
+      <div v-if="loading" class="flex items-center justify-center py-12">
+        <div class="flex flex-col items-center gap-4">
+          <div class="w-10 h-10 border-4 border-gray-200 border-t-brand-blue rounded-full animate-spin"></div>
+          <p class="text-gray-600 text-sm font-medium">Carregando comissões...</p>
+        </div>
       </div>
 
-      <div
-        v-for="comissao in paginatedComissoes"
-        :key="comissao.id"
-        class="grid grid-cols-12 gap-4 px-6 py-4 border-b border-gray-200 hover:bg-gray-50 items-center cursor-pointer transition-colors"
-        @click="goToComissao(comissao.id)"
-      >
-        <div class="col-span-5 text-sm text-gray-900">{{ comissao.nome }}</div>
-        <div class="col-span-3 text-sm text-gray-600">{{ comissao.sigla }}</div>
+      <template v-else>
+        <div class="grid grid-cols-12 gap-4 px-6 py-3 bg-gray-100 border-b border-gray-200">
+          <div class="col-span-8 text-sm font-medium text-gray-700">Comissão</div>
+          <div class="col-span-3 text-sm font-medium text-gray-700">Situação</div>
+          <div class="col-span-1"></div>
+        </div>
+
+        <div
+          v-for="comissao in paginatedComissoes"
+          :key="comissao.id"
+          class="grid grid-cols-12 gap-4 px-6 py-4 border-b border-gray-200 hover:bg-gray-50 items-center cursor-pointer transition-colors"
+          @click="goToComissao(comissao.id)"
+        >
+        <div class="col-span-8 text-sm text-gray-900">{{ comissao.comission_name }}</div>
         <div class="col-span-3">
           <span
-            v-if="comissao.situacao === 'Ativo'"
+            v-if="comissao.is_active === true"
             class="inline-flex px-3 py-1 rounded-full text-xs font-medium text-white"
             style="background-color: #10B981;"
           >
@@ -124,9 +70,10 @@
           </svg>
         </div>
       </div>
+      </template>
     </div>
 
-    <div class="flex items-center justify-between">
+    <div v-if=!loading class="flex items-center justify-between">
       <div class="flex items-center gap-4">
         <span class="text-sm text-gray-600">Mostrando</span>
         <select
@@ -183,21 +130,26 @@ import { comissoesService } from '@/services/api'
 const router = useRouter()
 
 const searchQuery = ref('')
-const selectedSituacao = ref('')
+const selectedis_active = ref('')
 const showExtintas = ref(false)
 const currentPage = ref(1)
 const perPage = ref(10)
+const loading = ref(true)
 
 const getComissoes = async () => {
+  loading.value = true
   try {
-    const response = await comissoesService.listar({
+    const response = await comissoesService.get({
       search: searchQuery.value,
-      situacao: selectedSituacao.value,
+      is_active: selectedis_active.value,
       showExtintas: showExtintas.value
     })
+    console.log(response);
     comissoes.value = response.data
   } catch (error) {
     console.error('Erro ao buscar comissões:', error)
+  } finally {
+    loading.value = false
   }
 }
 
@@ -205,34 +157,7 @@ onMounted(() => {
   getComissoes()
 })
 
-const comissoes = ref([
-  { id: 1, nome: 'Comissão de Saúde, Seguridade e Bem-Estar', sigla: 'AAAAA', situacao: 'Ativo' },
-  { id: 2, nome: 'Comissão de Planejamento, Uso e Ocupação', sigla: 'AAAAA', situacao: 'Ativo' },
-  { id: 3, nome: 'Comissão de Educação', sigla: 'AAAAA', situacao: 'Ativo' },
-  { id: 4, nome: 'Comissão de Educação', sigla: 'AAAAA', situacao: 'Ativo' },
-  { id: 5, nome: 'Comissão de Educação', sigla: 'AAAAA', situacao: 'Ativo' },
-  { id: 6, nome: 'Comissão de Educação', sigla: 'AAAAA', situacao: 'Ativo' },
-  { id: 7, nome: 'Comissão de Educação', sigla: 'AAAAA', situacao: 'Ativo' },
-  { id: 8, nome: 'Comissão de Legislação Parlamentar', sigla: 'AAAAA', situacao: 'Inativa' },
-  { id: 9, nome: 'Comissão de Legislação Parlamentar', sigla: 'AAAAA', situacao: 'Inativa' },
-  { id: 10, nome: 'Comissão de Legislação Parlamentar', sigla: 'AAAAA', situacao: 'Inativa' },
-  { id: 11, nome: 'Comissão de Finanças e Orçamento', sigla: 'BBBBB', situacao: 'Ativo' },
-  { id: 12, nome: 'Comissão de Meio Ambiente e Sustentabilidade', sigla: 'CCCCC', situacao: 'Ativo' },
-  { id: 13, nome: 'Comissão de Direitos Humanos', sigla: 'DDDDD', situacao: 'Ativo' },
-  { id: 14, nome: 'Comissão de Segurança Pública', sigla: 'EEEEE', situacao: 'Inativa' },
-  { id: 15, nome: 'Comissão de Cultura e Esporte', sigla: 'FFFFF', situacao: 'Ativo' },
-  { id: 16, nome: 'Comissão de Transporte e Mobilidade', sigla: 'GGGGG', situacao: 'Ativo' },
-  { id: 17, nome: 'Comissão de Desenvolvimento Econômico', sigla: 'HHHHH', situacao: 'Ativo' },
-  { id: 18, nome: 'Comissão de Habitação', sigla: 'IIIII', situacao: 'Inativa' },
-  { id: 19, nome: 'Comissão de Infraestrutura', sigla: 'JJJJJ', situacao: 'Ativo' },
-  { id: 20, nome: 'Comissão de Turismo', sigla: 'KKKKK', situacao: 'Ativo' },
-  ...Array.from({ length: 100 }, (_, i) => ({
-    id: 21 + i,
-    nome: `Comissão Fake ${i + 1}`,
-    sigla: `FK${String(i + 1).padStart(3, '0')}`,
-    situacao: i % 3 === 0 ? 'Inativa' : 'Ativo'
-  }))
-])
+const comissoes = ref([])
 
 const totalItems = computed(() => comissoes.value.length)
 const totalPages = computed(() => Math.ceil(totalItems.value / perPage.value))
@@ -290,6 +215,6 @@ const nextPage = () => {
 }
 
 const goToComissao = (id) => {
-  console.log('Detalhes da comissão:', id)
+  router.push({ name: 'comissao-detalhe', params: { id } })
 }
 </script>

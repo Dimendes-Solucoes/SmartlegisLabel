@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '@/views/HomeView.vue'
 import MesaDiretoraView from '@/views/MesaDiretoraView.vue'
 import ComissoesView from '@/views/ComissoesView.vue'
+import ComissaoDetalheView from '@/views/ComissaoDetalheView.vue'
 import ParlamentaresView from '@/views/ParlamentaresView.vue'
 import ParlamentarDetalheView from '@/views/ParlamentarDetalheView.vue'
 import PautasSessoesView from '@/views/PautasSessoesView.vue'
@@ -32,6 +33,11 @@ const router = createRouter({
       path: '/comissoes',
       name: 'comissoes',
       component: ComissoesView
+    },
+    {
+      path: '/comissoes/:id',
+      name: 'comissao-detalhe',
+      component: ComissaoDetalheView
     },
     {
       path: '/parlamentares',
