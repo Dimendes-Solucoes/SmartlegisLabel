@@ -342,6 +342,8 @@ const pagination = ref({
 const normas = ref([])
 
 onMounted(() => {
+  getTypes()
+  getSubjects()
   getNormas()
 })
 

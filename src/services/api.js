@@ -101,11 +101,11 @@ export class NormasService {
   }
 
   async getTypes() {
-    return await api.get('/external/norm-types')
+    return await api.get('/external/legal-norms/types')
   }
 
   async getSubjects() {
-    return await api.get('/external/norm-subjects')
+    return await api.get('/external/legal-norms/subjects')
   }
 }
 
