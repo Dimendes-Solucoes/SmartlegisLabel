@@ -169,7 +169,7 @@
         </h3>
 
         <p class="text-sm text-gray-700 mb-4 leading-relaxed uppercase">
-          {{ norma.name }}
+          {{ norma.object}}
         </p>
 
         <div class="flex items-center gap-6 flex-wrap">
@@ -342,6 +342,8 @@ const pagination = ref({
 const normas = ref([])
 
 onMounted(() => {
+  getTypes()
+  getSubjects()
   getNormas()
 })
 
