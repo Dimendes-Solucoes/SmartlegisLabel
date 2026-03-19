@@ -71,7 +71,7 @@ export class SessoesService {
   }
 
   async buscarPauta(sessaoId) {
-    return await api.get(`/external/sessoes/${sessaoId}/pauta`)
+    return await api.get(`/external/sessions/${sessaoId}/agenda`)
   }
 
 }

@@ -90,19 +90,19 @@
         <div class="col-span-2 text-sm text-gray-900">{{ sessao.session_type?.name || '—' }}</div>
         <div class="col-span-6 text-sm text-gray-900">Pauta da sessão {{ sessao.name }}</div>
         <div class="col-span-2">
-          <a
-            :href="sessao.pauta_url"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="inline-flex items-center gap-1 text-sm font-medium hover:underline"
+          <button
+            @click.stop="abrirPautaPdf(sessao.id)"
+            class="inline-flex items-center gap-1 text-sm font-medium hover:underline focus:outline-none"
             style="color: #007AB8;"
-            @click.stop
+            :disabled="sessao.isCarregandoPauta"
           >
-            Abrir
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <span v-if="sessao.isCarregandoPauta">Abrindo...</span>
+            <span v-else>Abrir</span>
+            <svg v-if="!sessao.isCarregandoPauta" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
             </svg>
-          </a>
+            <div v-else class="w-4 h-4 border-2 border-brand-blue border-t-transparent rounded-full animate-spin"></div>
+          </button>
         </div>
       </div>
 
@@ -322,6 +322,52 @@ const goToPage = (page) => {
   if (page !== pagination.value.currentPage && page >= 1 && page <= pagination.value.lastPage) {
     scrollToTop()
     getSessions(page)
+  }
+}
+
+const abrirPautaPdf = async (sessaoId) => {
+
+  const sessaoIndex = sessoes.value.findIndex(s => s.id === sessaoId)
+  if (sessaoIndex !== -1) {
+    sessoes.value[sessaoIndex].isCarregandoPauta = true
+  }
+
+  try {
+    const response = await sessoesService.buscarPauta(sessaoId)
+    
+    const base64String = response.data.data || response.data
+    
+    if (!base64String || base64String.length < 100) {
+       alert('Esta sessão ainda não possui uma pauta cadastrada.')
+       return
+    }
+
+    const byteCharacters = atob(base64String)
+    const byteNumbers = new Array(byteCharacters.length)
+    
+    for (let i = 0; i < byteCharacters.length; i++) {
+      byteNumbers[i] = byteCharacters.charCodeAt(i)
+    }
+    
+    const byteArray = new Uint8Array(byteNumbers)
+    
+    const blob = new Blob([byteArray], { type: 'application/pdf' })
+    
+    const fileURL = URL.createObjectURL(blob)
+    
+    window.open(fileURL, '_blank')
+    
+    setTimeout(() => {
+      URL.revokeObjectURL(fileURL)
+    }, 5000)
+
+  } catch (error) {
+    console.error('Erro ao buscar a pauta da sessão:', error)
+    alert('Não foi possível carregar o documento da pauta. Verifique sua conexão.')
+  } finally {
+    if (sessaoIndex !== -1) {
+      sessoes.value[sessaoIndex].isCarregandoPauta = false
+    }
   }
 }
 </script>
