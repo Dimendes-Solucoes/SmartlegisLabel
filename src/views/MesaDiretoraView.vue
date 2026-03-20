@@ -26,52 +26,26 @@
       </div>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-2">
-          Legislatura <span class="text-red-500">*</span>
-        </label>
-        <div class="relative">
-          <select
-            v-model="filters.legislature_id"
-            class="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg appearance-none focus:outline-none focus:ring-2 focus:ring-brand-blue focus:border-transparent"
+    <div class="mb-8 max-w-md">
+      <label class="block text-sm font-medium text-gray-700 mb-2">
+        Legislatura <span class="text-red-500">*</span>
+      </label>
+      <div class="relative">
+        <select
+          v-model="filters.legislature_id"
+          class="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg appearance-none focus:outline-none focus:ring-2 focus:ring-brand-blue focus:border-transparent"
+        >
+          <option
+            v-for="leg in legislaturas"
+            :key="leg.id"
+            :value="leg.id"
           >
-            <option value="">Todas as legislaturas</option>
-            <option
-              v-for="leg in legislaturas"
-              :key="leg.id"
-              :value="leg.id"
-            >
-              {{ leg.title }} {{ leg.is_current ? '- Atual' : '' }}
-            </option>
-          </select>
-          <svg class="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-          </svg>
-        </div>
-      </div>
-
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-2">
-          Período
-        </label>
-        <div class="flex gap-2">
-          <div class="relative flex-1">
-            <input
-              type="date"
-              v-model="filters.start_date"
-              class="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue text-sm text-gray-600"
-            />
-          </div>
-          <span class="flex items-center text-gray-500">a</span>
-          <div class="relative flex-1">
-            <input
-              type="date"
-              v-model="filters.end_date"
-              class="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue text-sm text-gray-600"
-            />
-          </div>
-        </div>
+            {{ leg.title }} {{ leg.is_current ? '- Atual' : '' }}
+          </option>
+        </select>
+        <svg class="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+        </svg>
       </div>
     </div>
 
@@ -110,9 +84,7 @@ const members = ref([])
 const loading = ref(false)
 
 const filters = ref({
-  legislature_id: '',
-  start_date: '',
-  end_date: ''
+  legislature_id: ''
 })
 
 const getLegislaturas = async () => {
@@ -134,23 +106,20 @@ const getLegislaturas = async () => {
 const getBoardDirector = async () => {
   try {
     loading.value = true
-    const params = {}
 
-    if (filters.value.legislature_id) {
-      params.legislature_id = filters.value.legislature_id
-    }
-    if (filters.value.start_date) {
-      params.start_date = filters.value.start_date
-    }
-    if (filters.value.end_date) {
-      params.end_date = filters.value.end_date
-    }
-
-    const response = await mesaDiretoraService.get(params)
-    
+    const response = await mesaDiretoraService.get()
     const dataList = response.data?.data || response.data || []
     
-    members.value = dataList.flatMap(item => item.users ?? [])
+    const mesaDiretoraFiltrada = dataList.filter(item => {
+      const isMesa = item.comission_name === 'MESA DIRETORA'
+      const matchLegislatura = filters.value.legislature_id 
+        ? item.legislature_id === filters.value.legislature_id 
+        : true
+
+      return isMesa && matchLegislatura
+    })
+    
+    members.value = mesaDiretoraFiltrada.flatMap(item => item.users ?? [])
     
   } catch (error) {
     console.error('Erro ao buscar mesa diretora:', error)
@@ -160,12 +129,12 @@ const getBoardDirector = async () => {
   }
 }
 
+// Watcher observando apenas a alteração da legislatura
 watch(
-  () => [filters.value.legislature_id, filters.value.start_date, filters.value.end_date],
+  () => filters.value.legislature_id,
   () => {
     getBoardDirector()
-  },
-  { deep: true }
+  }
 )
 
 const goToParlamentar = (id) => {
