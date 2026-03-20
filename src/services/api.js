@@ -70,8 +70,16 @@ export class SessoesService {
     return await api.get(`/external/sessions/${id}`)
   }
 
-  async buscarPauta(sessaoId) {
-    return await api.get(`/external/sessions/${sessaoId}/agenda`)
+  async buscarPautaPdf(sessaoId) {
+    return await api.get(`/external/sessions/${sessaoId}/agenda/pdf`)
+  }
+
+  async buscarPautaCsv(sessaoId) {
+    return await api.get(`/external/sessions/${sessaoId}/agenda/csv`)
+  }
+
+  async buscarPautaTxt(sessaoId) {
+    return await api.get(`/external/sessions/${sessaoId}/agenda/txt`)
   }
 
 }
