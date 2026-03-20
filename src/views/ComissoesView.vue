@@ -26,6 +26,29 @@
       </div>
     </div>
 
+    <div class="mb-8 max-w-md">
+      <label class="block text-sm font-medium text-gray-700 mb-2">
+        Legislatura <span class="text-red-500">*</span>
+      </label>
+      <div class="relative">
+        <select
+          v-model="filters.legislature_id"
+          class="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg appearance-none focus:outline-none focus:ring-2 focus:ring-brand-blue focus:border-transparent"
+        >
+          <option
+            v-for="leg in legislaturas"
+            :key="leg.id"
+            :value="leg.id"
+          >
+            {{ leg.title }} {{ leg.is_current ? '- Atual' : '' }}
+          </option>
+        </select>
+        <svg class="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+        </svg>
+      </div>
+    </div>
+
     <div class="bg-white rounded-lg shadow-sm overflow-hidden mb-6">
       <div v-if="loading" class="flex items-center justify-center py-12">
         <div class="flex flex-col items-center gap-4">
@@ -35,45 +58,51 @@
       </div>
 
       <template v-else>
-        <div class="grid grid-cols-12 gap-4 px-6 py-3 bg-gray-100 border-b border-gray-200">
-          <div class="col-span-8 text-sm font-medium text-gray-700">Comissão</div>
-          <div class="col-span-3 text-sm font-medium text-gray-700">Situação</div>
-          <div class="col-span-1"></div>
+        <div v-if="filteredComissoes.length === 0" class="text-center py-12 text-gray-500">
+          Nenhuma comissão encontrada para os filtros selecionados.
         </div>
+        
+        <div v-else>
+          <div class="grid grid-cols-12 gap-4 px-6 py-3 bg-gray-100 border-b border-gray-200">
+            <div class="col-span-8 text-sm font-medium text-gray-700">Comissão</div>
+            <div class="col-span-3 text-sm font-medium text-gray-700">Situação</div>
+            <div class="col-span-1"></div>
+          </div>
 
-        <div
-          v-for="comissao in paginatedComissoes"
-          :key="comissao.id"
-          class="grid grid-cols-12 gap-4 px-6 py-4 border-b border-gray-200 hover:bg-gray-50 items-center cursor-pointer transition-colors"
-          @click="goToComissao(comissao.id)"
-        >
-        <div class="col-span-8 text-sm text-gray-900">{{ comissao.comission_name }}</div>
-        <div class="col-span-3">
-          <span
-            v-if="comissao.is_active === true"
-            class="inline-flex px-3 py-1 rounded-full text-xs font-medium text-white"
-            style="background-color: #10B981;"
+          <div
+            v-for="comissao in paginatedComissoes"
+            :key="comissao.id"
+            class="grid grid-cols-12 gap-4 px-6 py-4 border-b border-gray-200 hover:bg-gray-50 items-center cursor-pointer transition-colors"
+            @click="goToComissao(comissao.id)"
           >
-            Ativo
-          </span>
-          <span
-            v-else
-            class="inline-flex px-3 py-1 rounded-full text-xs font-medium text-gray-700"
-            style="background-color: #E5E7EB;"
-          >
-            Inativa
-          </span>
+            <div class="col-span-8 text-sm text-gray-900">{{ comissao.comission_name }}</div>
+            <div class="col-span-3">
+              <span
+                v-if="comissao.is_active === true"
+                class="inline-flex px-3 py-1 rounded-full text-xs font-medium text-white"
+                style="background-color: #10B981;"
+              >
+                Ativo
+              </span>
+              <span
+                v-else
+                class="inline-flex px-3 py-1 rounded-full text-xs font-medium text-gray-700"
+                style="background-color: #E5E7EB;"
+              >
+                Inativa
+              </span>
+            </div>
+            <div class="col-span-1 flex justify-end">
+              <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+              </svg>
+            </div>
+          </div>
         </div>
-        <div class="col-span-1 flex justify-end">
-          <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-          </svg>
-        </div>
-      </div>
       </template>
     </div>
 
-    <div v-if=!loading class="flex items-center justify-between">
+    <div v-if="!loading && filteredComissoes.length > 0" class="flex items-center justify-between">
       <div class="flex items-center gap-4">
         <span class="text-sm text-gray-600">Mostrando</span>
         <select
@@ -123,18 +152,41 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import { comissoesService } from '@/services/api'
+import { comissoesService, legislaturasService } from '@/services/api'
 
 const router = useRouter()
 
 const searchQuery = ref('')
 const selectedis_active = ref('')
 const showExtintas = ref(false)
+
 const currentPage = ref(1)
 const perPage = ref(10)
 const loading = ref(true)
+
+const legislaturas = ref([])
+const comissoes = ref([]) 
+
+const filters = ref({
+  legislature_id: ''
+})
+
+const getLegislaturas = async () => {
+  try {
+    const response = await legislaturasService.get()
+    const dataList = response.data?.data || response.data || []
+    legislaturas.value = dataList
+
+    const legislaturaAtual = dataList.find(leg => leg.is_current)
+    if (legislaturaAtual) {
+      filters.value.legislature_id = legislaturaAtual.id
+    }
+  } catch (error) {
+    console.error('Erro ao buscar legislaturas:', error)
+  }
+}
 
 const getComissoes = async () => {
   loading.value = true
@@ -144,8 +196,7 @@ const getComissoes = async () => {
       is_active: selectedis_active.value,
       showExtintas: showExtintas.value
     })
-    console.log(response);
-    comissoes.value = response.data
+    comissoes.value = response.data?.data || response.data || []
   } catch (error) {
     console.error('Erro ao buscar comissões:', error)
   } finally {
@@ -153,19 +204,35 @@ const getComissoes = async () => {
   }
 }
 
-onMounted(() => {
+onMounted(async () => {
+  await getLegislaturas()
   getComissoes()
 })
 
-const comissoes = ref([])
+const filteredComissoes = computed(() => {
+  return comissoes.value.filter(item => {
 
-const totalItems = computed(() => comissoes.value.length)
-const totalPages = computed(() => Math.ceil(totalItems.value / perPage.value))
+    const isNotMesa = item.comission_name !== 'MESA DIRETORA'
+
+    const matchLegislatura = filters.value.legislature_id 
+      ? item.legislature_id === filters.value.legislature_id 
+      : true
+
+    return isNotMesa && matchLegislatura
+  })
+})
+
+watch(() => filters.value.legislature_id, () => {
+  currentPage.value = 1
+})
+
+const totalItems = computed(() => filteredComissoes.value.length)
+const totalPages = computed(() => Math.ceil(totalItems.value / perPage.value) || 1)
 
 const paginatedComissoes = computed(() => {
   const start = (currentPage.value - 1) * perPage.value
   const end = start + perPage.value
-  return comissoes.value.slice(start, end)
+  return filteredComissoes.value.slice(start, end)
 })
 
 const visiblePages = computed(() => {
@@ -191,10 +258,6 @@ const visiblePages = computed(() => {
 
   return pages
 })
-
-const handleSearch = () => {
-  console.log('Buscando:', searchQuery.value)
-}
 
 const goToPage = (page) => {
   if (page !== '...') {
