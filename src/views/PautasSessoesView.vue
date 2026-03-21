@@ -73,12 +73,11 @@
       </div>
     </div>
 
-    <div v-else class="bg-white rounded-lg shadow-sm overflow-hidden mb-6">
-      <div class="grid grid-cols-12 gap-4 px-6 py-3 bg-gray-100 border-b border-gray-200">
+    <div class="grid grid-cols-12 gap-4 px-6 py-3 bg-gray-100 border-b border-gray-200">
         <div class="col-span-2 text-sm font-medium text-gray-700">Data</div>
         <div class="col-span-2 text-sm font-medium text-gray-700">Tipo</div>
-        <div class="col-span-6 text-sm font-medium text-gray-700">Nome da sessão</div>
-        <div class="col-span-2 text-sm font-medium text-gray-700">Visualizar</div>
+        <div class="col-span-5 text-sm font-medium text-gray-700">Nome da sessão</div>
+        <div class="col-span-3 text-right text-sm font-medium text-gray-700 pr-2">Exportar</div>
       </div>
 
       <div
@@ -88,24 +87,51 @@
       >
         <div class="col-span-2 text-sm text-gray-900">{{ formatDate(sessao.datetime_start) }}</div>
         <div class="col-span-2 text-sm text-gray-900">{{ sessao.session_type?.name || '—' }}</div>
-        <div class="col-span-6 text-sm text-gray-900">Pauta da sessão {{ sessao.name }}</div>
-        <div class="col-span-2">
+        <div class="col-span-5 text-sm text-gray-900">Pauta da sessão {{ sessao.name }}</div>
+        
+        <div class="col-span-3 flex justify-end gap-2">
           <button
-            @click.stop="abrirPautaPdf(sessao.id)"
-            class="inline-flex items-center gap-1 text-sm font-medium hover:underline focus:outline-none"
-            style="color: #007AB8;"
-            :disabled="sessao.isCarregandoPauta"
+            @click.stop="baixarDocumento(sessao.id, 'pdf')"
+            :disabled="sessao.isCarregandoPdf"
+            class="px-3 py-1.5 rounded-lg text-xs font-medium text-white hover:opacity-90 transition-opacity inline-flex items-center disabled:opacity-50 disabled:cursor-not-allowed"
+            style="background-color: #EF4444;"
+            title="Baixar em PDF"
           >
-            <span v-if="sessao.isCarregandoPauta">Abrindo...</span>
-            <span v-else>Abrir</span>
-            <svg v-if="!sessao.isCarregandoPauta" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-            </svg>
-            <div v-else class="w-4 h-4 border-2 border-brand-blue border-t-transparent rounded-full animate-spin"></div>
+            <div v-if="sessao.isCarregandoPdf" class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+            <span v-else class="flex items-center">
+              <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+              PDF
+            </span>
+          </button>
+
+          <button
+            @click.stop="baixarDocumento(sessao.id, 'txt')"
+            :disabled="sessao.isCarregandoTxt"
+            class="px-3 py-1.5 rounded-lg text-xs font-medium text-white hover:opacity-90 transition-opacity inline-flex items-center disabled:opacity-50 disabled:cursor-not-allowed"
+            style="background-color: #4B5563;"
+            title="Baixar em TXT"
+          >
+            <div v-if="sessao.isCarregandoTxt" class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+            <span v-else class="flex items-center">
+              <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+              TXT
+            </span>
+          </button>
+
+          <button
+            @click.stop="baixarDocumento(sessao.id, 'csv')"
+            :disabled="sessao.isCarregandoCsv"
+            class="px-3 py-1.5 rounded-lg text-xs font-medium text-white hover:opacity-90 transition-opacity inline-flex items-center disabled:opacity-50 disabled:cursor-not-allowed"
+            style="background-color: #10B981;"
+            title="Baixar em CSV"
+          >
+            <div v-if="sessao.isCarregandoCsv" class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+            <span v-else class="flex items-center">
+              <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+              CSV
+            </span>
           </button>
         </div>
-      </div>
-
       <div v-if="!loading && sessoes.length === 0" class="px-6 py-10 text-center text-sm text-gray-500">
         Nenhuma pauta encontrada.
       </div>
@@ -325,20 +351,36 @@ const goToPage = (page) => {
   }
 }
 
-const abrirPautaPdf = async (sessaoId) => {
-
+const baixarDocumento = async (sessaoId, tipo = 'pdf') => {
   const sessaoIndex = sessoes.value.findIndex(s => s.id === sessaoId)
-  if (sessaoIndex !== -1) {
-    sessoes.value[sessaoIndex].isCarregandoPauta = true
-  }
+  if (sessaoIndex === -1) return
+
+  const estadoCarregamento = `isCarregando${tipo.charAt(0).toUpperCase() + tipo.slice(1)}`
+  sessoes.value[sessaoIndex][estadoCarregamento] = true
 
   try {
-    const response = await sessoesService.buscarPauta(sessaoId)
-    
+    let response
+    let mimeType
+    let extensao
+
+    if (tipo === 'pdf') {
+      response = await sessoesService.buscarPautaPdf(sessaoId)
+      mimeType = 'application/pdf'
+      extensao = 'pdf'
+    } else if (tipo === 'txt') {
+      response = await sessoesService.buscarPautaTxt(sessaoId)
+      mimeType = 'text/plain'
+      extensao = 'txt'
+    } else if (tipo === 'csv') {
+      response = await sessoesService.buscarPautaCsv(sessaoId)
+      mimeType = 'text/csv'
+      extensao = 'csv'
+    }
+
     const base64String = response.data.data || response.data
     
-    if (!base64String || base64String.length < 100) {
-       alert('Esta sessão ainda não possui uma pauta cadastrada.')
+    if (!base64String || base64String.length < 10) {
+       alert(`Esta sessão ainda não possui uma pauta exportável em ${tipo.toUpperCase()}.`)
        return
     }
 
@@ -350,23 +392,27 @@ const abrirPautaPdf = async (sessaoId) => {
     }
     
     const byteArray = new Uint8Array(byteNumbers)
-    
-    const blob = new Blob([byteArray], { type: 'application/pdf' })
+    const blob = new Blob([byteArray], { type: mimeType })
     
     const fileURL = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = fileURL
+    link.download = `pauta_sessao_${sessaoId}.${extensao}` 
     
-    window.open(fileURL, '_blank')
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
     
     setTimeout(() => {
       URL.revokeObjectURL(fileURL)
     }, 5000)
 
   } catch (error) {
-    console.error('Erro ao buscar a pauta da sessão:', error)
-    alert('Não foi possível carregar o documento da pauta. Verifique sua conexão.')
+    console.error(`Erro ao buscar a pauta em ${tipo}:`, error)
+    alert('Não foi possível fazer o download do documento. Verifique sua conexão.')
   } finally {
     if (sessaoIndex !== -1) {
-      sessoes.value[sessaoIndex].isCarregandoPauta = false
+      sessoes.value[sessaoIndex][estadoCarregamento] = false
     }
   }
 }
