@@ -97,9 +97,11 @@
         </label>
         <div class="relative">
           <select
+            v-model="filters.tipo"
             class="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg appearance-none focus:outline-none focus:ring-2 focus:ring-brand-blue focus:border-transparent"
           >
-            <option value="extraordinaria">Extraordinária</option>
+              <option :value="1">Ordinária</option>
+              <option :value="2">Extraordinária</option>
           </select>
           <svg class="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
@@ -295,7 +297,7 @@ const filters = ref({
   name: '',
   ano: 2026,
   mes: '',
-  tipo: ''
+  tipo: 1
 })
 
 const pagination = ref({
