@@ -238,23 +238,19 @@ const S3_HOST = import.meta.env.VITE_S3_HOST || ''
 const materias = ref([])
 const loading = ref(true)
 
-// --- CONEXÃO COM A API ---
-// --- CONEXÃO COM A API ---
+
 const getVotosSessao = async () => {
   try {
     loading.value = true
     const response = await sessoesService.buscarVotos(sessaoId)
     
-    // Extrai o payload de forma segura, ignorando se o Axios já desempacotou o 'data' ou não
     const payload = response.data?.data || response.data || response
     
     let rawDocuments = []
     
-    // 1. Tenta pegar do array 'documents' (como no JSON que você enviou agora)
     if (payload?.documents && Array.isArray(payload.documents)) {
       rawDocuments = payload.documents
     } 
-    // 2. Tenta pegar de 'ordem_do_dia' e 'expediente' (Conforme sua sugestão)
     else if (payload?.ordem_do_dia || payload?.expediente) {
       rawDocuments = [
         ...(payload.ordem_do_dia || []),
@@ -262,12 +258,10 @@ const getVotosSessao = async () => {
       ]
     }
 
-    // 3. Remove os documentos duplicados que o backend enviou (ex: ID 533 vindo duas vezes)
     const uniqueDocuments = Array.from(new Map(rawDocuments.map(doc => [doc.id, doc])).values())
     
     materias.value = uniqueDocuments
 
-    // Inicializa a paginação
     materias.value.forEach(materia => {
       paginationState.value[materia.id] = {
         currentPage: 1
@@ -285,12 +279,14 @@ onMounted(() => {
   getVotosSessao()
 })
 
+
 const getAvatar = (caminhoImagem, nome) => {
-  if (!caminhoImagem) {
+  if (!caminhoImagem || caminhoImagem === '') {
     const nomeFormatado = encodeURIComponent(nome || 'Parlamentar')
     return `https://ui-avatars.com/api/?name=${nomeFormatado}&background=E5E7EB&color=9CA3AF`
   }
-  return caminhoImagem.startsWith('http') ? caminhoImagem : `${S3_HOST}${caminhoImagem}`
+  
+  return caminhoImagem;
 }
 
 const exportarVotos = (materiaId) => {
@@ -298,7 +294,6 @@ const exportarVotos = (materiaId) => {
   alert('Funcionalidade de exportação em desenvolvimento. Aguardando integração com a API.')
 }
 
-// --- LÓGICA DE PAGINAÇÃO ---
 const paginationState = ref({})
 const itemsPerPage = 5 
 
