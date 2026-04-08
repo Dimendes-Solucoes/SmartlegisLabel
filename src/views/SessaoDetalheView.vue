@@ -34,7 +34,7 @@
 
     <div class="bg-gray-50 rounded-lg p-6 mb-8">
       <h3 class="text-lg font-bold text-gray-900 mb-4">
-        79ª Sessão Ordinária da 1ª Sessão Legislativa da 20ª Legislatura
+        Detalhes da Sessão
       </h3>
 
       <div class="grid grid-cols-2 gap-6 mb-4">
@@ -46,7 +46,7 @@
           </div>
           <div>
             <p class="text-sm font-medium text-gray-700">Data/hora</p>
-            <p class="text-sm text-gray-900">17 de Dezembro de 2025 (Quarta-feira) - 09h00</p>
+            <p class="text-sm text-gray-900">Visualizando Votações</p>
           </div>
         </div>
       </div>
@@ -54,7 +54,19 @@
 
     <h2 class="text-xl font-bold text-gray-900 mb-6">Votação nominal das matérias na ordem do dia</h2>
 
-    <div class="space-y-6">
+    <div v-if="loading" class="flex items-center justify-center py-20 mb-8">
+      <div class="flex flex-col items-center gap-4">
+        <div class="w-12 h-12 border-4 border-gray-200 border-t-blue-600 rounded-full animate-spin"></div>
+        <p class="text-gray-600">Buscando votos da sessão...</p>
+      </div>
+    </div>
+
+    <div v-else class="space-y-6">
+      
+      <div v-if="materias.length === 0" class="bg-white rounded-lg p-10 text-center text-gray-500 shadow-sm">
+        Nenhum documento registrado para esta sessão ainda.
+      </div>
+
       <div
         v-for="materia in materias"
         :key="materia.id"
@@ -64,29 +76,29 @@
           <div class="flex items-start justify-between mb-4">
             <div class="flex-1">
               <h3 class="text-lg font-bold text-gray-900 mb-2">
-                Matéria - {{ materia.titulo }}
+                Matéria - {{ materia.name }}
               </h3>
 
               <div class="flex items-center gap-6 text-sm">
                 <div>
                   <span class="text-gray-600">Total de votos</span>
-                  <span class="ml-2 font-semibold text-gray-900">{{ materia.votos.length }}</span>
+                  <span class="ml-2 font-semibold text-gray-900">{{ materia.totals?.total || 0 }}</span>
                 </div>
                 <div>
                   <span class="text-gray-600">Votos a favor</span>
                   <div class="inline-flex items-center justify-center w-6 h-6 rounded-full text-white text-xs font-bold ml-2" style="background-color: #10B981;">
-                    {{ contarVotos(materia, 'Favor') }}
+                    {{ materia.totals?.a_favor || 0 }}
                   </div>
                 </div>
                 <div>
                   <span class="text-gray-600">Votos contra</span>
                   <div class="inline-flex items-center justify-center w-6 h-6 rounded-full text-white text-xs font-bold ml-2" style="background-color: #EF4444;">
-                    {{ contarVotos(materia, 'Contra') }}
+                    {{ materia.totals?.contra || 0 }}
                   </div>
                 </div>
                 <div>
                   <span class="text-gray-600">Abstenção</span>
-                  <span class="ml-2 font-semibold text-gray-900">{{ contarVotos(materia, 'Abstenção') }}</span>
+                  <span class="ml-2 font-semibold text-gray-900">{{ materia.totals?.abstencao || 0 }}</span>
                 </div>
               </div>
             </div>
@@ -103,16 +115,16 @@
               </button>
 
               <div
-                class="px-6 py-3 rounded-lg font-bold text-white text-center min-w-[120px]"
-                :style="{ backgroundColor: calcularResultado(materia) === 'Reprovado' ? '#EF4444' : '#10B981' }"
+                class="px-6 py-3 rounded-lg font-bold text-white text-center min-w-[120px] capitalize"
+                :style="{ backgroundColor: (materia.resultado?.toLowerCase() === 'reprovado') ? '#EF4444' : (!materia.resultado || materia.resultado?.toLowerCase() === 'indefinido' ? '#9CA3AF' : '#10B981') }"
               >
                 <div class="text-xs mb-1">Resultado</div>
-                <div class="text-lg">{{ calcularResultado(materia) }}</div>
+                <div class="text-lg">{{ materia.resultado || 'Aguardando' }}</div>
               </div>
             </div>
           </div>
 
-          <div class="overflow-x-auto">
+          <div v-if="materia.votes && materia.votes.length > 0" class="overflow-x-auto">
             <div class="grid grid-cols-12 gap-4 px-4 py-3 bg-gray-100 border-b border-gray-200">
               <div class="col-span-5 text-sm font-medium text-gray-700">Parlamentar</div>
               <div class="col-span-3 text-sm font-medium text-gray-700">Partido</div>
@@ -126,36 +138,37 @@
               class="grid grid-cols-12 gap-4 px-4 py-4 border-b border-gray-200 items-center hover:bg-gray-50 transition-colors"
             >
               <div class="col-span-5 flex items-center gap-3">
-                <img :src="getAvatar(voto.foto, voto.nome)" class="w-8 h-8 rounded-full object-cover border border-gray-200" />
-                <span class="text-sm text-gray-900">{{ voto.nome }}</span>
+                <img :src="getAvatar(voto.user?.path_image, voto.user?.name)" class="w-8 h-8 rounded-full object-cover border border-gray-200" />
+                <span class="text-sm text-gray-900">{{ voto.user?.name || 'Não informado' }}</span>
               </div>
               <div class="col-span-3">
                 <span class="inline-flex px-3 py-1 rounded-full text-xs font-medium" style="background-color: rgba(0, 122, 184, 0.15); color: #007AB8;">
-                  {{ voto.partido }}
+                  {{ voto.user?.category_party?.name_party || 'Sem Partido' }}
                 </span>
               </div>
               <div class="col-span-3">
                 <span
-                  v-if="voto.voto === 'Favor'"
+                  v-if="voto.vote_category?.name === 'A favor'"
                   class="inline-flex px-3 py-1 rounded-full text-xs font-medium text-white"
                   style="background-color: #10B981;"
                 >
                   Favor
                 </span>
                 <span
-                  v-else-if="voto.voto === 'Abstenção'"
+                  v-else-if="voto.vote_category?.name === 'Abstenção'"
                   class="inline-flex px-3 py-1 rounded-full text-xs font-medium text-gray-700"
                   style="background-color: #E5E7EB;"
                 >
                   Abstenção
                 </span>
                 <span
-                  v-else
+                  v-else-if="voto.vote_category?.name === 'Contra'"
                   class="inline-flex px-3 py-1 rounded-full text-xs font-medium text-white"
                   style="background-color: #EF4444;"
                 >
                   Contra
                 </span>
+                <span v-else class="text-gray-500 text-xs">{{ voto.vote_category?.name || 'Não votou' }}</span>
               </div>
               <div class="col-span-1 flex justify-end">
                 <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -164,10 +177,14 @@
               </div>
             </div>
           </div>
+          
+          <div v-else class="px-4 py-6 text-center text-sm text-gray-500 border-t border-gray-100">
+            Esta matéria ainda não possui votos nominais registrados.
+          </div>
 
-          <div class="flex items-center justify-between px-4 py-4">
+          <div v-if="materia.votes && materia.votes.length > 0" class="flex items-center justify-between px-4 py-4">
             <div class="text-sm text-gray-600">
-              Mostrando {{ getInicioPaginacao(materia.id) }}-{{ getFimPaginacao(materia.id) }} de {{ materia.votos.length }} resultados
+              Mostrando {{ getInicioPaginacao(materia.id) }}-{{ getFimPaginacao(materia.id) }} de {{ materia.votes.length }} resultados
             </div>
             
             <div v-if="getTotalPages(materia.id) > 1" class="flex gap-2">
@@ -212,50 +229,61 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
+import { sessoesService } from '@/services/api' 
 
 const route = useRoute()
 const sessaoId = route.params.id
 const S3_HOST = import.meta.env.VITE_S3_HOST || '' 
 
-//DADOS MOCKADOS PARA TESTAR PAGINAÇÃO
-const materias = ref([
-  {
-    id: 1,
-    titulo: 'EA 12/2025 - EMENDA ADITIVA A PROJETO',
-    votos: [
-      { id: 1, nome: 'Tiago Pereira Agnaldo', partido: 'MDB', voto: 'Favor', foto: null },
-      { id: 2, nome: 'João da Silva', partido: 'PT', voto: 'Contra', foto: null },
-      { id: 3, nome: 'Maria Santos', partido: 'PSDB', voto: 'Contra', foto: null },
-      { id: 4, nome: 'Pedro Álvares', partido: 'PL', voto: 'Favor', foto: null },
-      { id: 5, nome: 'Ana Carolina', partido: 'MDB', voto: 'Abstenção', foto: null },
-      { id: 6, nome: 'José Augusto', partido: 'PDT', voto: 'Contra', foto: null },
-      { id: 7, nome: 'Marcos Paulo', partido: 'PT', voto: 'Favor', foto: null },
-      { id: 8, nome: 'Fernanda Lima', partido: 'PL', voto: 'Contra', foto: null }
-    ]
-  },
-  {
-    id: 2,
-    titulo: 'EA 12/2025 - EMENDA NOVA ADITIVA',
-    votos: [
-      { id: 10, nome: 'Tiago Pereira Agnaldo', partido: 'MDB', voto: 'Favor', foto: null },
-      { id: 11, nome: 'João da Silva', partido: 'PT', voto: 'Favor', foto: null },
-      { id: 12, nome: 'Maria Santos', partido: 'PSDB', voto: 'Favor', foto: null },
-      { id: 13, nome: 'Pedro Álvares', partido: 'PL', voto: 'Favor', foto: null },
-      { id: 14, nome: 'Ana Carolina', partido: 'MDB', voto: 'Abstenção', foto: null },
-      { id: 15, nome: 'José Augusto', partido: 'PDT', voto: 'Contra', foto: null }
-    ]
+const materias = ref([])
+const loading = ref(true)
+
+// --- CONEXÃO COM A API ---
+// --- CONEXÃO COM A API ---
+const getVotosSessao = async () => {
+  try {
+    loading.value = true
+    const response = await sessoesService.buscarVotos(sessaoId)
+    
+    // Extrai o payload de forma segura, ignorando se o Axios já desempacotou o 'data' ou não
+    const payload = response.data?.data || response.data || response
+    
+    let rawDocuments = []
+    
+    // 1. Tenta pegar do array 'documents' (como no JSON que você enviou agora)
+    if (payload?.documents && Array.isArray(payload.documents)) {
+      rawDocuments = payload.documents
+    } 
+    // 2. Tenta pegar de 'ordem_do_dia' e 'expediente' (Conforme sua sugestão)
+    else if (payload?.ordem_do_dia || payload?.expediente) {
+      rawDocuments = [
+        ...(payload.ordem_do_dia || []),
+        ...(payload.expediente || [])
+      ]
+    }
+
+    // 3. Remove os documentos duplicados que o backend enviou (ex: ID 533 vindo duas vezes)
+    const uniqueDocuments = Array.from(new Map(rawDocuments.map(doc => [doc.id, doc])).values())
+    
+    materias.value = uniqueDocuments
+
+    // Inicializa a paginação
+    materias.value.forEach(materia => {
+      paginationState.value[materia.id] = {
+        currentPage: 1
+      }
+    })
+
+  } catch (error) {
+    console.error('Erro ao buscar votos da sessão:', error)
+  } finally {
+    loading.value = false
   }
-])
-
-const contarVotos = (materia, tipo) => {
-  return materia.votos.filter(v => v.voto === tipo).length
 }
 
-const calcularResultado = (materia) => {
-  const favor = contarVotos(materia, 'Favor')
-  const contra = contarVotos(materia, 'Contra')
-  return favor > contra ? 'Aprovado' : 'Reprovado'
-}
+onMounted(() => {
+  getVotosSessao()
+})
 
 const getAvatar = (caminhoImagem, nome) => {
   if (!caminhoImagem) {
@@ -264,54 +292,46 @@ const getAvatar = (caminhoImagem, nome) => {
   }
   return caminhoImagem.startsWith('http') ? caminhoImagem : `${S3_HOST}${caminhoImagem}`
 }
+
 const exportarVotos = (materiaId) => {
-  //  todo
   console.log(`Iniciando exportação para a matéria ID: ${materiaId}`)
   alert('Funcionalidade de exportação em desenvolvimento. Aguardando integração com a API.')
 }
 
-
+// --- LÓGICA DE PAGINAÇÃO ---
 const paginationState = ref({})
 const itemsPerPage = 5 
 
-onMounted(() => {
-  materias.value.forEach(materia => {
-    paginationState.value[materia.id] = {
-      currentPage: 1
-    }
-  })
-})
-
 const getVotosPaginados = (materiaId) => {
   const materia = materias.value.find(m => m.id === materiaId)
-  if (!materia) return []
+  if (!materia || !materia.votes) return []
   
   const page = paginationState.value[materiaId]?.currentPage || 1
   const start = (page - 1) * itemsPerPage
   const end = start + itemsPerPage
   
-  return materia.votos.slice(start, end)
+  return materia.votes.slice(start, end)
 }
 
 const getTotalPages = (materiaId) => {
   const materia = materias.value.find(m => m.id === materiaId)
-  if (!materia) return 1
-  return Math.ceil(materia.votos.length / itemsPerPage)
+  if (!materia || !materia.votes) return 1
+  return Math.ceil(materia.votes.length / itemsPerPage) || 1
 }
 
 const getInicioPaginacao = (materiaId) => {
   const materia = materias.value.find(m => m.id === materiaId)
-  if (!materia || materia.votos.length === 0) return 0
+  if (!materia || !materia.votes || materia.votes.length === 0) return 0
   const page = paginationState.value[materiaId]?.currentPage || 1
   return ((page - 1) * itemsPerPage) + 1
 }
 
 const getFimPaginacao = (materiaId) => {
   const materia = materias.value.find(m => m.id === materiaId)
-  if (!materia) return 0
+  if (!materia || !materia.votes) return 0
   const page = paginationState.value[materiaId]?.currentPage || 1
   const fim = page * itemsPerPage
-  return fim > materia.votos.length ? materia.votos.length : fim
+  return fim > materia.votes.length ? materia.votes.length : fim
 }
 
 const getVisiblePages = (materiaId) => {
@@ -324,17 +344,19 @@ const getVisiblePages = (materiaId) => {
 }
 
 const goToPage = (materiaId, page) => {
-  paginationState.value[materiaId].currentPage = page
+  if (paginationState.value[materiaId]) {
+    paginationState.value[materiaId].currentPage = page
+  }
 }
 
 const prevPage = (materiaId) => {
-  if (paginationState.value[materiaId].currentPage > 1) {
+  if (paginationState.value[materiaId] && paginationState.value[materiaId].currentPage > 1) {
     paginationState.value[materiaId].currentPage--
   }
 }
 
 const nextPage = (materiaId) => {
-  if (paginationState.value[materiaId].currentPage < getTotalPages(materiaId)) {
+  if (paginationState.value[materiaId] && paginationState.value[materiaId].currentPage < getTotalPages(materiaId)) {
     paginationState.value[materiaId].currentPage++
   }
 }

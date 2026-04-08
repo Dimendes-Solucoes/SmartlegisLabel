@@ -82,6 +82,19 @@ export class SessoesService {
     return await api.get(`/external/sessions/${sessaoId}/agenda/txt`)
   }
 
+  async buscarVotos(sessaoId) {
+    return await api.get(`/external/sessions/${sessaoId}/votes`)
+  }
+
+  async buscarDocumentos(sessaoId, categoryId) {
+    return await api.get('/external/documents', {
+      params: { 
+        session_id: sessaoId, 
+        document_category_id: categoryId 
+      }
+    })
+  }
+
 }
 
 export class ComissoesService {
