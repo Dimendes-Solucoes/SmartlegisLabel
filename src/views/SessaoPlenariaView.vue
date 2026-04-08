@@ -298,6 +298,8 @@ import { ref, onMounted, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { sessoesService } from '@/services/api'
 
+const S3_HOST = import.meta.env.VITE_S3_HOST || ''
+
 const router = useRouter()
 
 const filters = ref({
@@ -454,19 +456,23 @@ const fazerDownloadBase64 = (base64String, nomeArquivo, mimeType = 'application/
 const baixarAta = async (sessao) => {
   try {
     sessao.isCarregandoAta = true
-    const response = await sessoesService.buscarDocumentos(sessao.id, 7)
-    
+    const response = await sessoesService.buscarDocumentos(sessao.id, 7) 
+
     const documentoInfo = response.data?.data?.[0] || response.data?.[0] || response.data?.data || response.data
-    const base64String = documentoInfo?.file || documentoInfo?.base64 || documentoInfo
     
-    if (!base64String || base64String.length < 100) {
-       alert('Esta sessão ainda não possui uma Ata registrada.')
+    const caminhoArquivo = documentoInfo?.attachment
+    
+    if (!caminhoArquivo) {
+       alert('Esta sessão ainda não possui o arquivo PDF da Ata anexado.')
        return
     }
-    fazerDownloadBase64(base64String, `Ata_Sessao_${sessao.id}.pdf`)
+
+    const urlCompleta = caminhoArquivo.startsWith('http') ? caminhoArquivo : `${S3_HOST}${caminhoArquivo}`
+    window.open(urlCompleta, '_blank')
+    
   } catch (error) {
-    console.error('Erro ao baixar a Ata:', error)
-    alert('Não foi possível fazer o download da Ata. Verifique sua conexão.')
+    console.error('Erro ao abrir a Ata:', error)
+    alert('Não foi possível acessar a Ata. Verifique sua conexão.')
   } finally {
     sessao.isCarregandoAta = false
   }
