@@ -42,9 +42,9 @@
         <div class="flex gap-6">
           <div class="flex-shrink-0">
             <img
-              :src="parlamentar.path_image ? S3_HOST + parlamentar.path_image : '/images/member-placeholder.jpg'"
+              :src="getAvatarUrl(parlamentar.path_image, parlamentar.name)"
               :alt="parlamentar.nickname"
-              class="w-64 h-64 rounded-lg object-cover"
+              class="w-64 h-64 rounded-lg object-cover border border-gray-200 shadow-sm"
             />
           </div>
 
@@ -87,7 +87,7 @@
 
             <div v-if="parlamentar?.category_party?.logo" class="mt-2">
               <img
-                :src="S3_HOST + parlamentar.category_party.logo"
+                :src="getAvatarUrl(parlamentar.category_party.logo)"
                 :alt="`Logo ${parlamentar.category_party.name_party}`"
                 class="h-16 object-contain"
               />
@@ -444,6 +444,7 @@
 import { ref, onMounted, computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { parlamentaresService, materiasService, relatoriosService } from '@/services/api'
+import { getAvatarUrl } from '@/utils/image-url'
 
 const route = useRoute()
 const router = useRouter()

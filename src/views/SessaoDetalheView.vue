@@ -138,9 +138,12 @@
               class="grid grid-cols-12 gap-4 px-4 py-4 border-b border-gray-200 items-center hover:bg-gray-50 transition-colors"
             >
               <div class="col-span-5 flex items-center gap-3">
-                <img :src="getAvatar(voto.user?.path_image, voto.user?.name)" class="w-8 h-8 rounded-full object-cover border border-gray-200" />
-                <span class="text-sm text-gray-900">{{ voto.user?.name || 'Não informado' }}</span>
-              </div>
+                  <img 
+                    :src="getAvatarUrl(voto.user?.path_image, voto.user?.name)" 
+                    class="w-8 h-8 rounded-full object-cover border border-gray-200" 
+                  />
+                  <span class="text-sm text-gray-900">{{ voto.user?.name || 'Não informado' }}</span>
+                </div>
               <div class="col-span-3">
                 <span class="inline-flex px-3 py-1 rounded-full text-xs font-medium" style="background-color: rgba(0, 122, 184, 0.15); color: #007AB8;">
                   {{ voto.user?.category_party?.name_party || 'Sem Partido' }}
@@ -230,10 +233,10 @@
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { sessoesService } from '@/services/api' 
+import { getAvatarUrl } from '@/utils/image-url'
 
 const route = useRoute()
 const sessaoId = route.params.id
-const S3_HOST = import.meta.env.VITE_S3_HOST || '' 
 
 const materias = ref([])
 const loading = ref(true)
@@ -301,16 +304,6 @@ const getVotosSessao = async () => {
 onMounted(() => {
   getVotosSessao()
 })
-
-
-const getAvatar = (caminhoImagem, nome) => {
-  if (!caminhoImagem || caminhoImagem === '') {
-    const nomeFormatado = encodeURIComponent(nome || 'Parlamentar')
-    return `https://ui-avatars.com/api/?name=${nomeFormatado}&background=E5E7EB&color=9CA3AF`
-  }
-  
-  return caminhoImagem;
-}
 
 const exportarVotos = async (materiaId) => {
   try {

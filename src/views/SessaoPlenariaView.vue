@@ -136,7 +136,6 @@
               </svg>
             </div>
             <div>
-              <p class="text-sm font-medium text-gray-700">Data/hora</p>
               <p class="text-sm text-gray-900">{{ formatDateTimeExtended(sessao.datetime_start) }}</p>
             </div>
           </div>

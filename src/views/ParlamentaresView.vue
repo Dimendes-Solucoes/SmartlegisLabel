@@ -2,11 +2,7 @@
   <div class="max-w-7xl mx-auto px-6 py-8">
     <nav class="text-sm mb-6">
       <ol class="flex items-center gap-2 text-gray-600">
-        <li>
-          <router-link to="/" class="hover:text-brand-blue">
-            Início
-          </router-link>
-        </li>
+        <li><router-link to="/" class="hover:text-brand-blue">Início</router-link></li>
         <li>›</li>
         <li class="text-gray-900 font-medium">Parlamentares</li>
       </ol>
@@ -27,73 +23,7 @@
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-2">
-          Buscar
-        </label>
-        <div class="flex gap-2">
-          <div class="relative flex-1">
-            <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-            <input
-              type="text"
-              v-model="searchQuery"
-              placeholder="Busque pelo nome do parlamentar..."
-              class="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue focus:border-transparent"
-            />
-          </div>
-        </div>
       </div>
-
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-2">
-          Legislatura
-        </label>
-        <div class="relative">
-          <select
-            v-model="selectedLegislatura"
-            class="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg appearance-none focus:outline-none focus:ring-2 focus:ring-brand-blue focus:border-transparent"
-          >
-            <option value="">Selecione</option>
-            <option
-              v-for="legislatura in legislaturas"
-              :key="legislatura.id"
-              :value="legislatura.id"
-            >
-              {{ legislatura.title }}
-            </option>
-          </select>
-          <svg class="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-          </svg>
-        </div>
-      </div>
-
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-2">
-          Partido
-        </label>
-        <div class="relative">
-          <select
-            v-model="selectedPartido"
-            class="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg appearance-none focus:outline-none focus:ring-2 focus:ring-brand-blue focus:border-transparent"
-          >
-            <option value="">Selecione</option>
-            <option
-              v-for="partido in partidos"
-              :key="partido.id"
-              :value="partido.id"
-            >
-              {{ partido.name_party }}
-            </option>
-          </select>
-          <svg class="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-          </svg>
-        </div>
-      </div>
-    </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
       <div
@@ -105,9 +35,9 @@
       >
         <div class="flex-shrink-0">
           <img
-            :src="parlamentar.path_image ? S3_HOST + parlamentar.path_image : '/images/member-placeholder.jpg'"
+            :src="getAvatarUrl(parlamentar.path_image, parlamentar.nickname)"
             :alt="parlamentar.nickname"
-            class="w-20 h-20 rounded-full object-cover"
+            class="w-20 h-20 rounded-full object-cover border border-gray-200"
           />
         </div>
 
@@ -122,9 +52,9 @@
 
         <div class="flex-shrink-0">
           <img
-            v-if="parlamentar?.category_party?.logo || ''"
-            :src="S3_HOST + (parlamentar.category_party?.logo || '')"
-            :alt="`Logo ${parlamentar.category_party?.[0]?.name_party || parlamentar.party}`"
+            v-if="parlamentar?.category_party?.logo"
+            :src="getAvatarUrl(parlamentar.category_party.logo)"
+            :alt="`Logo ${parlamentar.category_party?.name_party}`"
             class="h-12 object-contain"
           />
         </div>
@@ -137,9 +67,9 @@
 import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { parlamentaresService, partidosService, legislaturasService } from '@/services/api'
+import { getAvatarUrl } from '@/utils/image-url'
 
 const router = useRouter()
-const S3_HOST = import.meta.env.VITE_S3_HOST
 
 const searchQuery = ref('')
 const selectedLegislatura = ref('')
@@ -148,28 +78,19 @@ const selectedPartido = ref('')
 const todosParlamentares = ref([])
 const partidos = ref([])
 const legislaturas = ref([])
+
 const parlamentares = computed(() => {
   let resultado = todosParlamentares.value
-
   if (searchQuery.value) {
     const query = searchQuery.value.toLowerCase()
-    resultado = resultado.filter(p =>
-      p.nickname?.toLowerCase().includes(query)
-    )
+    resultado = resultado.filter(p => p.nickname?.toLowerCase().includes(query))
   }
-
   if (selectedLegislatura.value) {
-    resultado = resultado.filter(p =>
-      p.legislatures?.some(leg => leg.id === parseInt(selectedLegislatura.value))
-    )
+    resultado = resultado.filter(p => p.legislatures?.some(leg => leg.id === parseInt(selectedLegislatura.value)))
   }
-
   if (selectedPartido.value) {
-    resultado = resultado.filter(p =>
-      p.category_party?.id === parseInt(selectedPartido.value)
-    )
+    resultado = resultado.filter(p => p.category_party?.id === parseInt(selectedPartido.value))
   }
-
   return resultado
 })
 
@@ -200,10 +121,7 @@ const getPartidos = async () => {
 const getParlamentares = async () => {
   try {
     const response = await parlamentaresService.get()
-    todosParlamentares.value = response.users.filter(user => {
-      const status = user.status_user
-      return status === 1
-    })
+    todosParlamentares.value = response.users.filter(user => user.status_user === 1)
   } catch (error) {
     console.error('Erro ao buscar parlamentares:', error)
   }

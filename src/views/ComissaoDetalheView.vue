@@ -2,17 +2,9 @@
   <div class="max-w-7xl mx-auto px-6 py-8">
     <nav class="text-sm mb-6">
       <ol class="flex items-center gap-2 text-gray-600">
-        <li>
-          <router-link to="/" class="hover:text-brand-blue">
-            Início
-          </router-link>
-        </li>
+        <li><router-link to="/" class="hover:text-brand-blue">Início</router-link></li>
         <li>›</li>
-        <li>
-          <router-link to="/comissoes" class="hover:text-brand-blue">
-            Comissões
-          </router-link>
-        </li>
+        <li><router-link to="/comissoes" class="hover:text-brand-blue">Comissões</router-link></li>
         <li>›</li>
         <li class="text-gray-900 font-medium">{{ comissao?.comission_name || 'Comissão' }}</li>
       </ol>
@@ -54,39 +46,13 @@
       </div>
 
       <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div
+        <MemberCard
           v-for="parlamentar in parlamentares"
           :key="parlamentar.id"
-          class="rounded-lg shadow-sm p-4 flex items-center gap-4 cursor-pointer hover:shadow-md transition-shadow"
-          style="background-color: #EFEFEF;"
+          :member="parlamentar"
+          :s3-host="S3_HOST"
           @click="goToParlamentar(parlamentar.id)"
-        >
-          <div class="flex-shrink-0">
-            <img
-              :src="parlamentar.path_image ? S3_HOST + parlamentar.path_image : '/images/member-placeholder.jpg'"
-              :alt="parlamentar.nickname"
-              class="w-20 h-20 rounded-full object-cover"
-            />
-          </div>
-
-          <div class="flex-1">
-            <h3 class="text-base font-semibold text-gray-800 mb-2">
-              {{ parlamentar.nickname }}
-            </h3>
-            <span class="px-3 py-1 text-xs font-medium rounded-full inline-block" style="background-color: rgba(0, 122, 184, 0.15); color: #007AB8;">
-              {{ parlamentar?.category_party?.name_party || 'Partido não informado' }}
-            </span>
-          </div>
-
-          <div class="flex-shrink-0">
-            <img
-              v-if="parlamentar?.category_party?.logo"
-              :src="S3_HOST + parlamentar.category_party.logo"
-              :alt="`Logo ${parlamentar.category_party?.name_party}`"
-              class="h-12 object-contain"
-            />
-          </div>
-        </div>
+        />
       </div>
     </template>
   </div>
@@ -96,6 +62,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { comissoesService } from '@/services/api'
+import MemberCard from '@/components/MemberCard.vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -111,7 +78,8 @@ const getComissao = async () => {
   try {
     const response = await comissoesService.get()
     const id = parseInt(route.params.id)
-    comissao.value = response.data.find(c => c.id === id) ?? null
+    const data = response.data?.data || response.data || []
+    comissao.value = data.find(c => c.id === id) ?? null
   } catch (error) {
     console.error('Erro ao buscar comissão:', error)
   } finally {

@@ -126,16 +126,10 @@
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="flex items-center gap-3">
                     <img
-                      v-if="orador.user?.path_image"
-                      :src="S3_HOST + orador.user.path_image"
-                      :alt="orador.user.nickname"
-                      class="w-8 h-8 rounded-full object-cover"
+                      :src="getAvatarUrl(orador.user?.path_image, orador.user?.name)"
+                      :alt="orador.user?.nickname"
+                      class="w-8 h-8 rounded-full object-cover border border-gray-200"
                     />
-                    <div v-else class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
-                      <svg class="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
-                      </svg>
-                    </div>
                     <span class="text-sm text-gray-900">{{ orador.user?.name || 'Orador' }}</span>
                   </div>
                 </td>
@@ -193,18 +187,12 @@
                 <p class="font-medium text-gray-900">{{ materia.document_status_movement.name === 'prefeitura' ? 'Não' : 'Sim' }}</p>
               </div>
               <div class="flex items-center gap-3">
-                <div v-for="autor in materia.authors" :key="autor" class="flex items-center gap-3">
+                <div v-for="autor in materia.authors" :key="autor.id" class="flex items-center gap-3">
                   <img
-                    v-if="autor.path_image"
-                    :src="S3_HOST + autor.path_image"
+                    :src="getAvatarUrl(autor.path_image, autor.name)"
                     :alt="autor.name"
-                    class="w-8 h-8 rounded-full object-cover"
+                    class="w-8 h-8 rounded-full object-cover border border-gray-200"
                   />
-                  <div v-else class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
-                    <svg class="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                      <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
-                    </svg>
-                  </div>
                   <div>
                     <p class="text-sm font-medium text-gray-900">{{ autor.name || 'Autor não informado' }}</p>
                     <p class="text-xs text-gray-500">Autor</p>
@@ -215,7 +203,7 @@
 
             <div class="flex items-center justify-end">
 
-            <a :href="S3_HOST + materia.attachment" target="_blank">
+            <a :href="convertToS3Url(materia.attachment)" target="_blank">
               <div class="flex gap-3">
                 <button class="px-4 py-2 rounded-lg text-sm font-medium text-white hover:opacity-90 transition-opacity flex items-center gap-2" style="background-color: #007AB8;">
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -247,11 +235,11 @@
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { sessoesService } from '@/services/api'
+import { getAvatarUrl, convertToS3Url } from '@/utils/image-url'
 
 const route = useRoute()
 const router = useRouter()
 const sessaoId = route.params.id
-const S3_HOST = import.meta.env.VITE_S3_HOST
 
 const sessao = ref(null)
 const loading = ref(true)
