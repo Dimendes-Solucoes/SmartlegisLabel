@@ -226,6 +226,7 @@
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
 import { sessoesService } from '@/services/api'
+import { fazerDownloadBase64 } from '@/utils/file-helper'
 
 const filters = ref({
   ano: new Date().getFullYear(),
@@ -361,21 +362,15 @@ const baixarDocumento = async (sessaoId, tipo = 'pdf') => {
   try {
     let response
     let mimeType
-    let extensao
-
-    if (tipo === 'pdf') {
-      response = await sessoesService.buscarPautaPdf(sessaoId)
-      mimeType = 'application/pdf'
-      extensao = 'pdf'
-    } else if (tipo === 'txt') {
-      response = await sessoesService.buscarPautaTxt(sessaoId)
-      mimeType = 'text/plain'
-      extensao = 'txt'
-    } else if (tipo === 'csv') {
-      response = await sessoesService.buscarPautaCsv(sessaoId)
-      mimeType = 'text/csv'
-      extensao = 'csv'
+    
+    const config = {
+      pdf: { method: sessoesService.buscarPautaPdf, mime: 'application/pdf' },
+      txt: { method: sessoesService.buscarPautaTxt, mime: 'text/plain' },
+      csv: { method: sessoesService.buscarPautaCsv, mime: 'text/csv' }
     }
+
+    const { method, mime } = config[tipo]
+    response = await method(sessaoId)
 
     const base64String = response.data.data || response.data
     
@@ -384,32 +379,15 @@ const baixarDocumento = async (sessaoId, tipo = 'pdf') => {
        return
     }
 
-    const byteCharacters = atob(base64String)
-    const byteNumbers = new Array(byteCharacters.length)
-    
-    for (let i = 0; i < byteCharacters.length; i++) {
-      byteNumbers[i] = byteCharacters.charCodeAt(i)
-    }
-    
-    const byteArray = new Uint8Array(byteNumbers)
-    const blob = new Blob([byteArray], { type: mimeType })
-    
-    const fileURL = URL.createObjectURL(blob)
-    const link = document.createElement('a')
-    link.href = fileURL
-    link.download = `pauta_sessao_${sessaoId}.${extensao}` 
-    
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
-    
-    setTimeout(() => {
-      URL.revokeObjectURL(fileURL)
-    }, 5000)
+    fazerDownloadBase64(
+      base64String, 
+      `pauta_sessao_${sessaoId}.${tipo}`, 
+      mime
+    )
 
   } catch (error) {
     console.error(`Erro ao buscar a pauta em ${tipo}:`, error)
-    alert('Não foi possível fazer o download do documento. Verifique sua conexão.')
+    alert('Não foi possível fazer o download do documento.')
   } finally {
     if (sessaoIndex !== -1) {
       sessoes.value[sessaoIndex][estadoCarregamento] = false

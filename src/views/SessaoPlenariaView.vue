@@ -296,6 +296,8 @@
 import { ref, onMounted, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { sessoesService } from '@/services/api'
+import { convertToS3Url } from '@/utils/image-url'
+import { fazerDownloadBase64 } from '@/utils/file-helper'
 
 const S3_HOST = import.meta.env.VITE_S3_HOST || ''
 
@@ -433,32 +435,12 @@ const getSessions = async (page = 1) => {
   }
 }
 
-const fazerDownloadBase64 = (base64String, nomeArquivo, mimeType = 'application/pdf') => {
-  const byteCharacters = atob(base64String)
-  const byteNumbers = new Array(byteCharacters.length)
-  for (let i = 0; i < byteCharacters.length; i++) {
-    byteNumbers[i] = byteCharacters.charCodeAt(i)
-  }
-  const byteArray = new Uint8Array(byteNumbers)
-  const blob = new Blob([byteArray], { type: mimeType })
-  const fileURL = URL.createObjectURL(blob)
-  const link = document.createElement('a')
-  link.href = fileURL
-  link.download = nomeArquivo
-  document.body.appendChild(link)
-  link.click()
-  document.body.removeChild(link)
-  setTimeout(() => URL.revokeObjectURL(fileURL), 5000)
-}
-
-
 const baixarAta = async (sessao) => {
   try {
     sessao.isCarregandoAta = true
     const response = await sessoesService.buscarDocumentos(sessao.id, 7) 
 
     const documentoInfo = response.data?.data?.[0] || response.data?.[0] || response.data?.data || response.data
-    
     const caminhoArquivo = documentoInfo?.attachment
     
     if (!caminhoArquivo) {
@@ -466,12 +448,12 @@ const baixarAta = async (sessao) => {
        return
     }
 
-    const urlCompleta = caminhoArquivo.startsWith('http') ? caminhoArquivo : `${S3_HOST}${caminhoArquivo}`
+    const urlCompleta = convertToS3Url(caminhoArquivo)
     window.open(urlCompleta, '_blank')
     
   } catch (error) {
     console.error('Erro ao abrir a Ata:', error)
-    alert('Não foi possível acessar a Ata. Verifique sua conexão.')
+    alert('Não foi possível acessar a Ata.')
   } finally {
     sessao.isCarregandoAta = false
   }
@@ -487,10 +469,11 @@ const baixarPauta = async (sessao) => {
        alert('Esta sessão ainda não possui uma pauta exportável.')
        return
     }
-    fazerDownloadBase64(base64String, `Pauta_Sessao_${sessao.id}.pdf`)
+    fazerDownloadBase64(base64String, `Pauta_Sessao_${sessao.id}.pdf`, 'application/pdf')
+    
   } catch (error) {
     console.error('Erro ao baixar a Pauta:', error)
-    alert('Não foi possível fazer o download da Pauta. Verifique sua conexão.')
+    alert('Não foi possível fazer o download da Pauta.')
   } finally {
     sessao.isCarregandoPauta = false
   }
