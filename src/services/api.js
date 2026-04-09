@@ -95,6 +95,10 @@ export class SessoesService {
     })
   }
 
+  async exportarVotosPdf(documentoId) {
+    return api.get(`/external/documents/${documentoId}/votes`);
+  }
+
 }
 
 export class ComissoesService {

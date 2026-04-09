@@ -239,6 +239,29 @@ const materias = ref([])
 const loading = ref(true)
 
 
+const fazerDownloadBase64 = (base64String, nomeArquivo, mimeType = 'application/pdf') => {
+  try {
+    const byteCharacters = atob(base64String)
+    const byteNumbers = new Array(byteCharacters.length)
+    for (let i = 0; i < byteCharacters.length; i++) {
+      byteNumbers[i] = byteCharacters.charCodeAt(i)
+    }
+    const byteArray = new Uint8Array(byteNumbers)
+    const blob = new Blob([byteArray], { type: mimeType })
+    const fileURL = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = fileURL
+    link.download = nomeArquivo
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    setTimeout(() => URL.revokeObjectURL(fileURL), 5000)
+  } catch (e) {
+    console.error('Erro ao processar download Base64:', e)
+    alert('Erro ao processar o arquivo para download.')
+  }
+}
+
 const getVotosSessao = async () => {
   try {
     loading.value = true
@@ -289,9 +312,21 @@ const getAvatar = (caminhoImagem, nome) => {
   return caminhoImagem;
 }
 
-const exportarVotos = (materiaId) => {
-  console.log(`Iniciando exportação para a matéria ID: ${materiaId}`)
-  alert('Funcionalidade de exportação em desenvolvimento. Aguardando integração com a API.')
+const exportarVotos = async (materiaId) => {
+  try {
+    const response = await sessoesService.exportarVotosPdf(materiaId);
+    const base64String = response.data?.data || response.data;
+
+    if (base64String && (typeof base64String === 'string') && base64String.startsWith('JVBERi')) {
+      fazerDownloadBase64(base64String, `votos_materia_${materiaId}.pdf`);
+    } else {
+      alert('Ocorreu um erro: O formato do arquivo retornado não é um PDF válido.');
+      console.error('Resposta inesperada:', response);
+    }
+  } catch (error) {
+    console.error('Erro ao exportar votos:', error);
+    alert('Não foi possível gerar o PDF de votos.');
+  }
 }
 
 const paginationState = ref({})
