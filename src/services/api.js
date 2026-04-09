@@ -95,10 +95,18 @@ export class SessoesService {
     })
   }
 
+  async exportarVotos(sessaoId, documentoId, type = 'pdf') {
+    return await api.get(`/external/sessions/${sessaoId}/votes/export`, {
+      params: {
+        document_id: documentoId,
+        export_type: type
+      }
+    })
+  }
+
   async exportarVotosPdf(documentoId) {
     return api.get(`/external/documents/${documentoId}/votes`);
   }
-
 }
 
 export class ComissoesService {
