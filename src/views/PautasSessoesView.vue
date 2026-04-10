@@ -3,9 +3,7 @@
     <nav class="text-sm mb-6">
       <ol class="flex items-center gap-2 text-gray-600">
         <li>
-          <router-link to="/" class="hover:text-brand-blue">
-            Início
-          </router-link>
+          <router-link to="/" class="hover:text-brand-blue">Início</router-link>
         </li>
         <li>›</li>
         <li class="text-gray-900 font-medium">Pautas das sessões</li>
@@ -28,13 +26,11 @@
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-2">
-          Ano
-        </label>
+        <label class="block text-sm font-medium text-gray-700 mb-2">Ano</label>
         <div class="relative">
           <select
             v-model="filters.ano"
-            class="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg appearance-none focus:outline-none focus:ring-2 focus:ring-brand-blue focus:border-transparent"
+            class="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg appearance-none focus:outline-none focus:ring-2 focus:ring-brand-blue"
           >
             <option value="">Selecione</option>
             <option v-for="year in years" :key="year" :value="year">{{ year }}</option>
@@ -46,13 +42,11 @@
       </div>
 
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-2">
-          Tipo
-        </label>
+        <label class="block text-sm font-medium text-gray-700 mb-2">Tipo</label>
         <div class="relative">
           <select
             v-model="filters.tipo"
-            class="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg appearance-none focus:outline-none focus:ring-2 focus:ring-brand-blue focus:border-transparent"
+            class="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg appearance-none focus:outline-none focus:ring-2 focus:ring-brand-blue"
           >
             <option value="">Selecione</option>
             <option value="inaugural">Sessão Inaugural</option>
@@ -73,11 +67,12 @@
       </div>
     </div>
 
-    <div class="grid grid-cols-12 gap-4 px-6 py-3 bg-gray-100 border-b border-gray-200">
+    <div v-else>
+      <div class="grid grid-cols-12 gap-4 px-6 py-3 bg-gray-100 border-b border-gray-200">
         <div class="col-span-2 text-sm font-medium text-gray-700">Data</div>
         <div class="col-span-2 text-sm font-medium text-gray-700">Tipo</div>
         <div class="col-span-5 text-sm font-medium text-gray-700">Nome da sessão</div>
-        <div class="col-span-3 text-right text-sm font-medium text-gray-700 pr-2">Exportar</div>
+        <div class="col-span-3 text-right text-sm font-medium text-gray-700 pr-2">Ações</div>
       </div>
 
       <div
@@ -89,55 +84,44 @@
         <div class="col-span-2 text-sm text-gray-900">{{ sessao.session_type?.name || '—' }}</div>
         <div class="col-span-5 text-sm text-gray-900">Pauta da sessão {{ sessao.name }}</div>
         
-        <div class="col-span-3 flex justify-end gap-2">
-          <button
-            @click.stop="baixarDocumento(sessao.id, 'pdf')"
-            :disabled="sessao.isCarregandoPdf"
-            class="px-3 py-1.5 rounded-lg text-xs font-medium text-white hover:opacity-90 transition-opacity inline-flex items-center disabled:opacity-50 disabled:cursor-not-allowed"
-            style="background-color: #EF4444;"
-            title="Baixar em PDF"
-          >
-            <div v-if="sessao.isCarregandoPdf" class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-            <span v-else class="flex items-center">
-              <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-              PDF
-            </span>
-          </button>
+        <div class="col-span-3 flex justify-end">
+          <div class="relative inline-block text-left">
+            <button
+              @click.stop="toggleDropdown(sessao.id)"
+              :disabled="sessao.isExportando"
+              class="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 flex items-center gap-2 disabled:opacity-50"
+            >
+              <div v-if="sessao.isExportando" class="w-4 h-4 border-2 border-brand-blue border-t-transparent rounded-full animate-spin"></div>
+              <svg v-else class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+              </svg>
+              Exportar
+              <svg class="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
 
-          <button
-            @click.stop="baixarDocumento(sessao.id, 'txt')"
-            :disabled="sessao.isCarregandoTxt"
-            class="px-3 py-1.5 rounded-lg text-xs font-medium text-white hover:opacity-90 transition-opacity inline-flex items-center disabled:opacity-50 disabled:cursor-not-allowed"
-            style="background-color: #4B5563;"
-            title="Baixar em TXT"
-          >
-            <div v-if="sessao.isCarregandoTxt" class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-            <span v-else class="flex items-center">
-              <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-              TXT
-            </span>
-          </button>
-
-          <button
-            @click.stop="baixarDocumento(sessao.id, 'csv')"
-            :disabled="sessao.isCarregandoCsv"
-            class="px-3 py-1.5 rounded-lg text-xs font-medium text-white hover:opacity-90 transition-opacity inline-flex items-center disabled:opacity-50 disabled:cursor-not-allowed"
-            style="background-color: #10B981;"
-            title="Baixar em CSV"
-          >
-            <div v-if="sessao.isCarregandoCsv" class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-            <span v-else class="flex items-center">
-              <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
-              CSV
-            </span>
-          </button>
+            <div 
+              v-if="activeDropdown === sessao.id" 
+              class="absolute right-0 mt-2 w-40 bg-white border border-gray-200 rounded-lg shadow-xl z-50 overflow-hidden"
+            >
+              <button @click="baixarDocumento(sessao.id, 'pdf')" class="w-full text-left px-4 py-2 text-sm hover:bg-gray-50 flex items-center gap-2 border-b border-gray-50">
+                <span class="w-2 h-2 rounded-full bg-red-500"></span> PDF
+              </button>
+              <button @click="baixarDocumento(sessao.id, 'csv')" class="w-full text-left px-4 py-2 text-sm hover:bg-gray-50 flex items-center gap-2 border-b border-gray-50">
+                <span class="w-2 h-2 rounded-full bg-green-500"></span> CSV
+              </button>
+              <button @click="baixarDocumento(sessao.id, 'txt')" class="w-full text-left px-4 py-2 text-sm hover:bg-gray-50 flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-gray-400"></span> TXT
+              </button>
+            </div>
+          </div>
         </div>
+      </div>
       <div v-if="!loading && sessoes.length === 0" class="px-6 py-10 text-center text-sm text-gray-500">
         Nenhuma pauta encontrada.
       </div>
     </div>
 
-    <div class="flex items-center justify-between">
+    <div class="flex items-center justify-between mt-6">
       <div class="text-sm text-gray-600">
         Mostrando {{ startItem }}-{{ endItem }} de {{ pagination.total }} resultados
       </div>
@@ -145,45 +129,34 @@
         <button
           @click="goToPage(1)"
           :disabled="pagination.currentPage === 1"
-          :class="[
-            'px-3 py-2 text-sm font-medium rounded-lg',
-            pagination.currentPage === 1
-              ? 'text-gray-400 bg-white border border-gray-300 cursor-not-allowed'
-              : 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50'
-          ]"
+          class="px-3 py-2 text-sm font-medium rounded-lg text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 disabled:opacity-50"
           title="Primeira página"
         >
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
           </svg>
         </button>
+
         <button
           @click="previousPage"
           :disabled="pagination.currentPage === 1"
-          :class="[
-            'px-4 py-2 text-sm font-medium rounded-lg',
-            pagination.currentPage === 1
-              ? 'text-gray-400 bg-white border border-gray-300 cursor-not-allowed'
-              : 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50'
-          ]"
+          class="px-4 py-2 text-sm font-medium rounded-lg text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 disabled:opacity-50"
         >
           Anterior
         </button>
+
         <button
           v-for="page in visiblePages"
           :key="page"
           @click="goToPage(page)"
-          :class="[
-            'px-4 py-2 text-sm font-medium rounded-lg',
-            page === pagination.currentPage
-              ? 'text-white'
-              : 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50'
-          ]"
-          :style="page === pagination.currentPage ? 'background-color: #003d6f;' : ''"
+          class="px-4 py-2 text-sm font-medium rounded-lg border transition-colors"
+          :class="page === pagination.currentPage ? 'bg-brand-blue text-white border-brand-blue' : 'text-gray-700 bg-white border-gray-300 hover:bg-gray-50'"
         >
           {{ page }}
         </button>
+
         <span v-if="showEllipsis" class="px-3 py-2 text-gray-500">...</span>
+
         <button
           v-if="shouldShowLastPage"
           @click="goToPage(pagination.lastPage)"
@@ -191,27 +164,19 @@
         >
           {{ pagination.lastPage }}
         </button>
+
         <button
           @click="nextPage"
           :disabled="pagination.currentPage === pagination.lastPage"
-          :class="[
-            'px-4 py-2 text-sm font-medium rounded-lg',
-            pagination.currentPage === pagination.lastPage
-              ? 'text-gray-400 bg-white border border-gray-300 cursor-not-allowed'
-              : 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50'
-          ]"
+          class="px-4 py-2 text-sm font-medium rounded-lg text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 disabled:opacity-50"
         >
           Próximo
         </button>
+
         <button
           @click="goToPage(pagination.lastPage)"
           :disabled="pagination.currentPage === pagination.lastPage"
-          :class="[
-            'px-3 py-2 text-sm font-medium rounded-lg',
-            pagination.currentPage === pagination.lastPage
-              ? 'text-gray-400 bg-white border border-gray-300 cursor-not-allowed'
-              : 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50'
-          ]"
+          class="px-3 py-2 text-sm font-medium rounded-lg text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 disabled:opacity-50"
           title="Última página"
         >
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -224,7 +189,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, watch, onUnmounted } from 'vue'
 import { sessoesService } from '@/services/api'
 import { fazerDownloadBase64 } from '@/utils/file-helper'
 
@@ -242,7 +207,15 @@ const pagination = ref({
 
 const sessoes = ref([])
 const loading = ref(false)
-let debounceTimeout = null
+const activeDropdown = ref(null)
+
+const toggleDropdown = (id) => {
+  activeDropdown.value = activeDropdown.value === id ? null : id
+}
+
+const closeAllDropdowns = (e) => {
+  if (!e.target.closest('.relative')) activeDropdown.value = null
+}
 
 const startItem = computed(() => {
   if (pagination.value.total === 0) return 0
@@ -258,12 +231,10 @@ const visiblePages = computed(() => {
   const pages = []
   const current = pagination.value.currentPage
   const last = pagination.value.lastPage
-
   pages.push(current)
   for (let i = 1; i <= 3 && current + i <= last; i++) {
     pages.push(current + i)
   }
-
   return pages
 })
 
@@ -280,7 +251,7 @@ const shouldShowLastPage = computed(() => {
 const years = computed(() => {
   const currentYear = new Date().getFullYear()
   const yearList = []
-  for (let year = currentYear + 5; year >= 2000; year--) {
+  for (let year = currentYear; year >= 2000; year--) {
     yearList.push(year)
   }
   return yearList
@@ -308,7 +279,8 @@ const getSessions = async (page = 1) => {
     if (filters.value.tipo) params.session_type_id = filters.value.tipo
 
     const response = await sessoesService.get(params)
-    sessoes.value = response.data
+    sessoes.value = response.data.map(s => ({ ...s, isExportando: false }))
+    
     pagination.value = {
       currentPage: response.current_page,
       lastPage: response.last_page,
@@ -322,47 +294,15 @@ const getSessions = async (page = 1) => {
   }
 }
 
-onMounted(() => {
-  getSessions()
-})
-
-watch(
-  () => [filters.value.ano, filters.value.tipo],
-  () => { getSessions(1) }
-)
-
-const previousPage = () => {
-  if (pagination.value.currentPage > 1) {
-    scrollToTop()
-    getSessions(pagination.value.currentPage - 1)
-  }
-}
-
-const nextPage = () => {
-  if (pagination.value.currentPage < pagination.value.lastPage) {
-    scrollToTop()
-    getSessions(pagination.value.currentPage + 1)
-  }
-}
-
-const goToPage = (page) => {
-  if (page !== pagination.value.currentPage && page >= 1 && page <= pagination.value.lastPage) {
-    scrollToTop()
-    getSessions(page)
-  }
-}
-
 const baixarDocumento = async (sessaoId, tipo = 'pdf') => {
-  const sessaoIndex = sessoes.value.findIndex(s => s.id === sessaoId)
-  if (sessaoIndex === -1) return
+  activeDropdown.value = null
+  const sessao = sessoes.value.find(s => s.id === sessaoId)
+  if (!sessao) return
 
-  const estadoCarregamento = `isCarregando${tipo.charAt(0).toUpperCase() + tipo.slice(1)}`
-  sessoes.value[sessaoIndex][estadoCarregamento] = true
+  sessao.isExportando = true
 
   try {
     let response
-    let mimeType
-    
     const config = {
       pdf: { method: sessoesService.buscarPautaPdf, mime: 'application/pdf' },
       txt: { method: sessoesService.buscarPautaTxt, mime: 'text/plain' },
@@ -379,19 +319,30 @@ const baixarDocumento = async (sessaoId, tipo = 'pdf') => {
        return
     }
 
-    fazerDownloadBase64(
-      base64String, 
-      `pauta_sessao_${sessaoId}.${tipo}`, 
-      mime
-    )
-
+    fazerDownloadBase64(base64String, `pauta_sessao_${sessaoId}.${tipo}`, mime)
   } catch (error) {
     console.error(`Erro ao buscar a pauta em ${tipo}:`, error)
     alert('Não foi possível fazer o download do documento.')
   } finally {
-    if (sessaoIndex !== -1) {
-      sessoes.value[sessaoIndex][estadoCarregamento] = false
-    }
+    sessao.isExportando = false
   }
 }
+
+onMounted(() => {
+  getSessions()
+  window.addEventListener('click', closeAllDropdowns)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('click', closeAllDropdowns)
+})
+
+watch(
+  () => [filters.value.ano, filters.value.tipo],
+  () => { getSessions(1) }
+)
+
+const previousPage = () => { if (pagination.value.currentPage > 1) { scrollToTop(); getSessions(pagination.value.currentPage - 1); } }
+const nextPage = () => { if (pagination.value.currentPage < pagination.value.lastPage) { scrollToTop(); getSessions(pagination.value.currentPage + 1); } }
+const goToPage = (p) => { if (p !== pagination.value.currentPage) { scrollToTop(); getSessions(p); } }
 </script>
