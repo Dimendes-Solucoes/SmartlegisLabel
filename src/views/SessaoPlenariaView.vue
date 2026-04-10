@@ -354,10 +354,9 @@ const shouldShowLastPage = computed(() => {
 const years = computed(() => {
   const currentYear = new Date().getFullYear()
   const startYear = 2000
-  const endYear = currentYear + 5
   const yearList = []
 
-  for (let year = endYear; year >= startYear; year--) {
+  for (let year = currentYear; year >= startYear; year--) {
     yearList.push(year)
   }
 
