@@ -204,7 +204,7 @@ import { ref, onMounted, onUnmounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { sessoesService } from '@/services/api' 
 import { getAvatarUrl } from '@/utils/image-url'
-import { fazerDownloadBase64 } from '@/utils/file-helper'
+import { fazerDownloadBase64, gerarNomeArquivo } from '@/utils/file-helper'
 
 const route = useRoute()
 const sessaoId = route.params.id
@@ -239,7 +239,9 @@ const handleExport = async (materiaId, type) => {
         csv: 'text/csv',
         txt: 'text/plain'
       }
-      fazerDownloadBase64(base64String, `votos_sessao_${sessaoId}_materia_${materiaId}.${type}`, mimeTypes[type])
+
+      const nomeDoArquivo = gerarNomeArquivo('votos', materia.name, type)
+      fazerDownloadBase64(base64String, nomeDoArquivo, mimeTypes[type])
     }
   } catch (error) {
     console.error('Erro ao exportar:', error)

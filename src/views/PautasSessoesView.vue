@@ -191,7 +191,7 @@
 <script setup>
 import { ref, computed, onMounted, watch, onUnmounted } from 'vue'
 import { sessoesService } from '@/services/api'
-import { fazerDownloadBase64 } from '@/utils/file-helper'
+import { fazerDownloadBase64, gerarNomeArquivo } from '@/utils/file-helper'
 
 const filters = ref({
   ano: new Date().getFullYear(),
@@ -319,7 +319,8 @@ const baixarDocumento = async (sessaoId, tipo = 'pdf') => {
        return
     }
 
-    fazerDownloadBase64(base64String, `pauta_sessao_${sessaoId}.${tipo}`, mime)
+    const nomeDoArquivo = gerarNomeArquivo('pauta', sessao.name, tipo)
+    fazerDownloadBase64(base64String, nomeDoArquivo, mime)
   } catch (error) {
     console.error(`Erro ao buscar a pauta em ${tipo}:`, error)
     alert('Não foi possível fazer o download do documento.')

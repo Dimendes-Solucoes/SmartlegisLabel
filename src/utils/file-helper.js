@@ -35,3 +35,16 @@ export const fazerDownloadBase64 = (base64String, nomeArquivo, mimeType) => {
     alert('Erro ao gerar o arquivo para download.');
   }
 };
+
+export const gerarNomeArquivo = (tipo, identificador, extensao) => {
+  const nomeLimpo = identificador
+    .normalize('NFD')               
+    .replace(/[\u0300-\u036f]/g, '') 
+    .replace(/\s+/g, '_')           
+    .replace(/[^\w-]/g, '')         
+    .toLowerCase();                 
+    
+  const tipoMinusculo = tipo.toLowerCase();
+
+  return `${tipoMinusculo}_${nomeLimpo}.${extensao}`;
+};

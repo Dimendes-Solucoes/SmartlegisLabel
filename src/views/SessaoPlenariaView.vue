@@ -297,7 +297,7 @@ import { ref, onMounted, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { sessoesService } from '@/services/api'
 import { convertToS3Url } from '@/utils/image-url'
-import { fazerDownloadBase64 } from '@/utils/file-helper'
+import { fazerDownloadBase64, gerarNomeArquivo } from '@/utils/file-helper'
 
 const S3_HOST = import.meta.env.VITE_S3_HOST || ''
 
@@ -468,7 +468,8 @@ const baixarPauta = async (sessao) => {
        alert('Esta sessão ainda não possui uma pauta exportável.')
        return
     }
-    fazerDownloadBase64(base64String, `Pauta_Sessao_${sessao.id}.pdf`, 'application/pdf')
+    const nomeDoArquivo = gerarNomeArquivo('pauta', sessao.name, 'pdf')
+    fazerDownloadBase64(base64String, nomeDoArquivo, 'application/pdf')
     
   } catch (error) {
     console.error('Erro ao baixar a Pauta:', error)
