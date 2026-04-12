@@ -97,9 +97,11 @@
         </label>
         <div class="relative">
           <select
+            v-model="filters.tipo"
             class="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg appearance-none focus:outline-none focus:ring-2 focus:ring-brand-blue focus:border-transparent"
           >
-            <option value="extraordinaria">Extraordinária</option>
+              <option :value="1">Ordinária</option>
+              <option :value="2">Extraordinária</option>
           </select>
           <svg class="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
@@ -134,7 +136,6 @@
               </svg>
             </div>
             <div>
-              <p class="text-sm font-medium text-gray-700">Data/hora</p>
               <p class="text-sm text-gray-900">{{ formatDateTimeExtended(sessao.datetime_start) }}</p>
             </div>
           </div>
@@ -162,21 +163,35 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
               </svg>
             </button>
-            <button @click.stop class="px-4 py-2 rounded-lg text-sm font-medium bg-white border hover:bg-gray-50 transition-colors flex items-center gap-2" style="color: #007AB8; border-color: #007AB8;">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            
+            <button 
+              @click.stop="baixarAta(sessao)"
+              :disabled="sessao.isCarregandoAta"
+              class="px-4 py-2 rounded-lg text-sm font-medium bg-white border hover:bg-gray-50 transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed" 
+              style="color: #007AB8; border-color: #007AB8;"
+            >
+              <div v-if="sessao.isCarregandoAta" class="w-4 h-4 border-2 border-[#007AB8] border-t-transparent rounded-full animate-spin"></div>
+              <svg v-else class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
               Ata
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg v-if="!sessao.isCarregandoAta" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
               </svg>
             </button>
-            <button @click.stop class="px-4 py-2 rounded-lg text-sm font-medium text-white hover:opacity-90 transition-opacity flex items-center gap-2" style="background-color: #007AB8;">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+
+            <button 
+              @click.stop="baixarPauta(sessao)"
+              :disabled="sessao.isCarregandoPauta"
+              class="px-4 py-2 rounded-lg text-sm font-medium text-white hover:opacity-90 transition-opacity flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed" 
+              style="background-color: #007AB8;"
+            >
+              <div v-if="sessao.isCarregandoPauta" class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+              <svg v-else class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
               Pauta
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg v-if="!sessao.isCarregandoPauta" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
               </svg>
             </button>
@@ -190,7 +205,6 @@
         Mostrando {{ startItem }}-{{ endItem }} de {{ pagination.total }} resultados
       </div>
       <div class="flex gap-2">
-        <!-- Primeira página -->
         <button
           @click="goToPage(1)"
           :disabled="pagination.currentPage === 1"
@@ -207,7 +221,6 @@
           </svg>
         </button>
 
-        <!-- Anterior -->
         <button
           @click="previousPage"
           :disabled="pagination.currentPage === 1"
@@ -221,7 +234,6 @@
           Anterior
         </button>
 
-        <!-- Números das páginas -->
         <button
           v-for="page in visiblePages"
           :key="page"
@@ -237,10 +249,8 @@
           {{ page }}
         </button>
 
-        <!-- Reticências se necessário -->
         <span v-if="showEllipsis" class="px-3 py-2 text-gray-500">...</span>
 
-        <!-- Última página (se não estiver visível) -->
         <button
           v-if="shouldShowLastPage"
           @click="goToPage(pagination.lastPage)"
@@ -249,7 +259,6 @@
           {{ pagination.lastPage }}
         </button>
 
-        <!-- Próximo -->
         <button
           @click="nextPage"
           :disabled="pagination.currentPage === pagination.lastPage"
@@ -263,7 +272,6 @@
           Próximo
         </button>
 
-        <!-- Última página -->
         <button
           @click="goToPage(pagination.lastPage)"
           :disabled="pagination.currentPage === pagination.lastPage"
@@ -288,6 +296,10 @@
 import { ref, onMounted, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { sessoesService } from '@/services/api'
+import { convertToS3Url } from '@/utils/image-url'
+import { fazerDownloadBase64, gerarNomeArquivo } from '@/utils/file-helper'
+
+const S3_HOST = import.meta.env.VITE_S3_HOST || ''
 
 const router = useRouter()
 
@@ -295,7 +307,7 @@ const filters = ref({
   name: '',
   ano: 2026,
   mes: '',
-  tipo: ''
+  tipo: 1
 })
 
 const pagination = ref({
@@ -342,10 +354,9 @@ const shouldShowLastPage = computed(() => {
 const years = computed(() => {
   const currentYear = new Date().getFullYear()
   const startYear = 2000
-  const endYear = currentYear + 5
   const yearList = []
 
-  for (let year = endYear; year >= startYear; year--) {
+  for (let year = currentYear; year >= startYear; year--) {
     yearList.push(year)
   }
 
@@ -397,23 +408,19 @@ const getSessions = async (page = 1) => {
       per_page: pagination.value.perPage
     }
 
-    if (filters.value.name) {
-      params.name = filters.value.name
-    }
-    if (filters.value.ano) {
-      params.year = filters.value.ano
-    }
-    if (filters.value.mes) {
-      params.month = filters.value.mes
-    }
-    if (filters.value.tipo) {
-      params.session_type_id = filters.value.tipo
-    }
+    if (filters.value.name) params.name = filters.value.name
+    if (filters.value.ano) params.year = filters.value.ano
+    if (filters.value.mes) params.month = filters.value.mes
+    if (filters.value.tipo) params.session_type_id = filters.value.tipo
 
     const response = await sessoesService.get(params)
-    console.log('Sessões retornadas:', response.data)
 
-    sessoes.value = response.data
+    sessoes.value = response.data.map(sessao => ({
+      ...sessao,
+      isCarregandoAta: false,
+      isCarregandoPauta: false
+    }))
+    
     pagination.value = {
       currentPage: response.current_page,
       lastPage: response.last_page,
@@ -427,20 +434,59 @@ const getSessions = async (page = 1) => {
   }
 }
 
-watch(() => filters.value.name, () => {
-  if (debounceTimeout) {
-    clearTimeout(debounceTimeout)
+const baixarAta = async (sessao) => {
+  try {
+    sessao.isCarregandoAta = true
+    const response = await sessoesService.buscarDocumentos(sessao.id, 7) 
+
+    const documentoInfo = response.data?.data?.[0] || response.data?.[0] || response.data?.data || response.data
+    const caminhoArquivo = documentoInfo?.attachment
+    
+    if (!caminhoArquivo) {
+       alert('Esta sessão ainda não possui o arquivo PDF da Ata anexado.')
+       return
+    }
+
+    const urlCompleta = convertToS3Url(caminhoArquivo)
+    window.open(urlCompleta, '_blank')
+    
+  } catch (error) {
+    console.error('Erro ao abrir a Ata:', error)
+    alert('Não foi possível acessar a Ata.')
+  } finally {
+    sessao.isCarregandoAta = false
   }
-  debounceTimeout = setTimeout(() => {
-    getSessions(1)
-  }, 500)
+}
+
+const baixarPauta = async (sessao) => {
+  try {
+    sessao.isCarregandoPauta = true
+    const response = await sessoesService.buscarPautaPdf(sessao.id)
+    const base64String = response.data?.data || response.data
+    
+    if (!base64String || base64String.length < 100) {
+       alert('Esta sessão ainda não possui uma pauta exportável.')
+       return
+    }
+    const nomeDoArquivo = gerarNomeArquivo('pauta', sessao.name, 'pdf')
+    fazerDownloadBase64(base64String, nomeDoArquivo, 'application/pdf')
+    
+  } catch (error) {
+    console.error('Erro ao baixar a Pauta:', error)
+    alert('Não foi possível fazer o download da Pauta.')
+  } finally {
+    sessao.isCarregandoPauta = false
+  }
+}
+
+watch(() => filters.value.name, () => {
+  if (debounceTimeout) clearTimeout(debounceTimeout)
+  debounceTimeout = setTimeout(() => { getSessions(1) }, 500)
 })
 
 watch(
   () => [filters.value.ano, filters.value.mes, filters.value.tipo],
-  () => {
-    getSessions(1)
-  }
+  () => { getSessions(1) }
 )
 
 const previousPage = () => {

@@ -5,15 +5,15 @@
   >
     <div class="flex-shrink-0">
       <img
-        :src="member.path_image ? s3Host + member.path_image : '/images/member-placeholder.jpg'"
+        :src="getImageUrl(member.path_image, member.nickname || member.name)"
         :alt="member.nickname"
-        class="w-20 h-20 rounded-full object-cover"
+        class="w-20 h-20 rounded-full object-cover border border-gray-200"
       />
     </div>
 
     <div class="flex-1">
       <h3 class="text-base font-semibold text-gray-800 mb-2">
-        {{ member.nickname }}
+        {{ member.nickname || member.name }}
       </h3>
       <div class="flex items-center gap-2">
         <span
@@ -32,7 +32,7 @@
     <div class="flex-shrink-0">
       <img
         v-if="member.category_party?.logo"
-        :src="s3Host + member.category_party.logo"
+        :src="getImageUrl(member.category_party.logo)"
         :alt="`Logo ${member.category_party?.name_party}`"
         class="h-12 object-contain"
       />
@@ -41,7 +41,7 @@
 </template>
 
 <script setup>
-defineProps({
+const props = defineProps({
   member: {
     type: Object,
     required: true
@@ -51,4 +51,21 @@ defineProps({
     default: ''
   }
 })
+
+const getImageUrl = (path, name) => {
+  if (!path || path === '') {
+    if (!name) return ''; 
+    const nomeFormatado = encodeURIComponent(name);
+    return `https://ui-avatars.com/api/?name=${nomeFormatado}&background=E5E7EB&color=9CA3AF`;
+  }
+
+  if (path.startsWith('http')) {
+    return path;
+  }
+
+  const base = props.s3Host.endsWith('/') ? props.s3Host.slice(0, -1) : props.s3Host;
+  const cleanPath = path.startsWith('/') ? path : `/${path}`;
+
+  return `${base}${cleanPath}`;
+}
 </script>

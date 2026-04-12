@@ -82,6 +82,31 @@ export class SessoesService {
     return await api.get(`/external/sessions/${sessaoId}/agenda/txt`)
   }
 
+  async buscarVotos(sessaoId) {
+    return await api.get(`/external/sessions/${sessaoId}/votes`)
+  }
+
+  async buscarDocumentos(sessaoId, categoryId) {
+    return await api.get('/external/documents', {
+      params: { 
+        session_id: sessaoId, 
+        document_category_id: categoryId 
+      }
+    })
+  }
+
+  async exportarVotos(sessaoId, documentoId, type = 'pdf') {
+    return await api.get(`/external/sessions/${sessaoId}/votes/export`, {
+      params: {
+        document_id: documentoId,
+        export_type: type
+      }
+    })
+  }
+
+  async exportarVotosPdf(documentoId) {
+    return api.get(`/external/documents/${documentoId}/votes`);
+  }
 }
 
 export class ComissoesService {

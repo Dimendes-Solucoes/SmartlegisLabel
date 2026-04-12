@@ -41,7 +41,7 @@ api.interceptors.request.use(
   }
 )
 
-function convertImageUrls(data, imageFields = ['foto', 'imagem', 'image', 'brasao', 'url_foto', 'avatar', 'thumbnail', 'banner']) {
+function convertImageUrls(data, imageFields = ['foto', 'imagem', 'image', 'brasao', 'url_foto', 'avatar', 'thumbnail', 'banner', 'path_image']) {
   if (!data) return data
 
   if (Array.isArray(data)) {

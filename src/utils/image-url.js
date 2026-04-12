@@ -72,8 +72,22 @@ export function convertArrayImages(array, imageFields = ['foto', 'imagem', 'imag
   return array.map(item => convertObjectImages(item, imageFields))
 }
 
+export function getAvatarUrl(path, name = 'Parlamentar') {
+  if (!path || path === '') {
+    const nomeFormatado = encodeURIComponent(name);
+    return `https://ui-avatars.com/api/?name=${nomeFormatado}&background=E5E7EB&color=9CA3AF`;
+  }
+
+  if (typeof path === 'string' && path.startsWith('http')) {
+    return path;
+  }
+
+  return convertToS3Url(path);
+}
+
 export default {
   convertToS3Url,
+  getAvatarUrl,
   convertObjectImages,
   convertArrayImages,
   useImageUrl,
