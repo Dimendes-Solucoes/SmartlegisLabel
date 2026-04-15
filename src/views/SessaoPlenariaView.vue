@@ -297,7 +297,7 @@ import { ref, onMounted, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { sessoesService } from '@/services/api'
 import { convertToS3Url } from '@/utils/image-url'
-import { fazerDownloadBase64, gerarNomeArquivo } from '@/utils/file-helper'
+import { baixarArquivoViaLink } from '@/utils/file-helper'
 
 const S3_HOST = import.meta.env.VITE_S3_HOST || ''
 
@@ -461,20 +461,23 @@ const baixarAta = async (sessao) => {
 const baixarPauta = async (sessao) => {
   try {
     sessao.isCarregandoPauta = true
-    const response = await sessoesService.buscarPautaPdf(sessao.id)
-    const base64String = response.data?.data || response.data
     
-    if (!base64String || base64String.length < 100) {
-       alert('Esta sessão ainda não possui uma pauta exportável.')
+    const response = await sessoesService.exportarPauta(sessao.id, 'pdf')
+    
+    const urlDownload = response.data?.data || response.data?.url || response.data
+    
+    if (!urlDownload || typeof urlDownload !== 'string') {
+       alert('Esta sessão ainda não possui uma pauta disponível para exportação.')
        return
     }
-    const nomeDoArquivo = gerarNomeArquivo('pauta', sessao.name, 'pdf')
-    fazerDownloadBase64(base64String, nomeDoArquivo, 'application/pdf')
+
+    window.open(urlDownload, '_blank')
     
   } catch (error) {
     console.error('Erro ao baixar a Pauta:', error)
-    alert('Não foi possível fazer o download da Pauta.')
+    alert('Não foi possível gerar a Pauta no momento.')
   } finally {
+    sessao.isExportando = false 
     sessao.isCarregandoPauta = false
   }
 }

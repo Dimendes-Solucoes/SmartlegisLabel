@@ -48,3 +48,16 @@ export const gerarNomeArquivo = (tipo, identificador, extensao) => {
 
   return `${tipoMinusculo}_${nomeLimpo}.${extensao}`;
 };
+
+export const baixarArquivoViaLink = (url) => {
+  if (!url) return;
+
+  const link = document.createElement('a');
+  link.href = url;
+  link.setAttribute('download', '');
+  link.setAttribute('target', '_blank');
+
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+};
