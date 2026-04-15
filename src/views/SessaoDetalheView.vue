@@ -116,8 +116,8 @@
                   <button @click="handleExport(materia.id, 'pdf')" class="w-full text-left px-4 py-2 text-sm hover:bg-gray-50 border-b border-gray-50 flex items-center gap-2">
                     <span class="w-2 h-2 rounded-full bg-red-500"></span> PDF
                   </button>
-                  <button @click="handleExport(materia.id, 'csv')" class="w-full text-left px-4 py-2 text-sm hover:bg-gray-50 border-b border-gray-50 flex items-center gap-2">
-                    <span class="w-2 h-2 rounded-full bg-green-500"></span> CSV 
+                  <button @click="handleExport(materia.id, 'xlsx')" class="w-full text-left px-4 py-2 text-sm hover:bg-gray-50 border-b border-gray-50 flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-green-500"></span> XLSX 
                   </button>
                   <button @click="handleExport(materia.id, 'txt')" class="w-full text-left px-4 py-2 text-sm hover:bg-gray-50 flex items-center gap-2">
                     <span class="w-2 h-2 rounded-full bg-gray-400"></span> TXT
@@ -204,7 +204,7 @@ import { ref, onMounted, onUnmounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { sessoesService } from '@/services/api' 
 import { getAvatarUrl } from '@/utils/image-url'
-import { fazerDownloadBase64, gerarNomeArquivo } from '@/utils/file-helper'
+import { baixarArquivoViaLink } from '@/utils/file-helper'
 
 const route = useRoute()
 const sessaoId = route.params.id
@@ -230,22 +230,20 @@ const handleExport = async (materiaId, type) => {
 
   try {
     materia.isExportando = true
-    const response = await sessoesService.exportarVotos(sessaoId, materiaId, type)
-    const base64String = response.data?.data || response.data
     
-    if (base64String) {
-      const mimeTypes = {
-        pdf: 'application/pdf',
-        csv: 'text/csv',
-        txt: 'text/plain'
-      }
-
-      const nomeDoArquivo = gerarNomeArquivo('votos', materia.name, type)
-      fazerDownloadBase64(base64String, nomeDoArquivo, mimeTypes[type])
+    const response = await sessoesService.exportarVotos(sessaoId, materiaId, type)
+    
+    const urlDownload = response.data?.data || response.data?.url || response.data
+    
+    if (urlDownload && typeof urlDownload === 'string') {
+      window.open(urlDownload, '_blank')
+    } else {
+      alert('Não foi possível recuperar o link de exportação.')
     }
+
   } catch (error) {
     console.error('Erro ao exportar:', error)
-    alert('Erro ao gerar exportação.')
+    alert('Erro ao processar a exportação dos votos.')
   } finally {
     materia.isExportando = false
   }

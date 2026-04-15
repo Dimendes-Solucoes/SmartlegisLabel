@@ -106,8 +106,8 @@
               <button @click="baixarDocumento(sessao.id, 'pdf')" class="w-full text-left px-4 py-2 text-sm hover:bg-gray-50 flex items-center gap-2 border-b border-gray-50">
                 <span class="w-2 h-2 rounded-full bg-red-500"></span> PDF
               </button>
-              <button @click="baixarDocumento(sessao.id, 'csv')" class="w-full text-left px-4 py-2 text-sm hover:bg-gray-50 flex items-center gap-2 border-b border-gray-50">
-                <span class="w-2 h-2 rounded-full bg-green-500"></span> CSV
+              <button @click="baixarDocumento(sessao.id, 'xlsx')" class="w-full text-left px-4 py-2 text-sm hover:bg-gray-50 flex items-center gap-2 border-b border-gray-50">
+                <span class="w-2 h-2 rounded-full bg-green-500"></span> XLSX
               </button>
               <button @click="baixarDocumento(sessao.id, 'txt')" class="w-full text-left px-4 py-2 text-sm hover:bg-gray-50 flex items-center gap-2">
                 <span class="w-2 h-2 rounded-full bg-gray-400"></span> TXT
@@ -191,7 +191,7 @@
 <script setup>
 import { ref, computed, onMounted, watch, onUnmounted } from 'vue'
 import { sessoesService } from '@/services/api'
-import { fazerDownloadBase64, gerarNomeArquivo } from '@/utils/file-helper'
+import { baixarArquivoViaLink } from '@/utils/file-helper'
 
 const filters = ref({
   ano: new Date().getFullYear(),
@@ -302,28 +302,20 @@ const baixarDocumento = async (sessaoId, tipo = 'pdf') => {
   sessao.isExportando = true
 
   try {
-    let response
-    const config = {
-      pdf: { method: sessoesService.buscarPautaPdf, mime: 'application/pdf' },
-      txt: { method: sessoesService.buscarPautaTxt, mime: 'text/plain' },
-      csv: { method: sessoesService.buscarPautaCsv, mime: 'text/csv' }
-    }
 
-    const { method, mime } = config[tipo]
-    response = await method(sessaoId)
-
-    const base64String = response.data.data || response.data
+    const response = await sessoesService.exportarPauta(sessaoId, tipo) 
+    const urlDownload = response.data?.url || response.data
     
-    if (!base64String || base64String.length < 10) {
-       alert(`Esta sessão ainda não possui uma pauta exportável em ${tipo.toUpperCase()}.`)
+    if (!urlDownload) {
+       alert(`Não foi possível gerar o link de exportação para ${tipo.toUpperCase()}.`)
        return
     }
 
-    const nomeDoArquivo = gerarNomeArquivo('pauta', sessao.name, tipo)
-    fazerDownloadBase64(base64String, nomeDoArquivo, mime)
+    baixarArquivoViaLink(urlDownload)
+
   } catch (error) {
-    console.error(`Erro ao buscar a pauta em ${tipo}:`, error)
-    alert('Não foi possível fazer o download do documento.')
+    console.error(`Erro ao exportar pauta em ${tipo}:`, error)
+    alert('Erro ao solicitar o arquivo ao servidor.')
   } finally {
     sessao.isExportando = false
   }

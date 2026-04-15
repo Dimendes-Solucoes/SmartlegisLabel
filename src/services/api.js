@@ -70,18 +70,6 @@ export class SessoesService {
     return await api.get(`/external/sessions/${id}`)
   }
 
-  async buscarPautaPdf(sessaoId) {
-    return await api.get(`/external/sessions/${sessaoId}/agenda/pdf`)
-  }
-
-  async buscarPautaCsv(sessaoId) {
-    return await api.get(`/external/sessions/${sessaoId}/agenda/csv`)
-  }
-
-  async buscarPautaTxt(sessaoId) {
-    return await api.get(`/external/sessions/${sessaoId}/agenda/txt`)
-  }
-
   async buscarVotos(sessaoId) {
     return await api.get(`/external/sessions/${sessaoId}/votes`)
   }
@@ -95,18 +83,18 @@ export class SessoesService {
     })
   }
 
-  async exportarVotos(sessaoId, documentoId, type = 'pdf') {
-    return await api.get(`/external/sessions/${sessaoId}/votes/export`, {
-      params: {
-        document_id: documentoId,
-        export_type: type
-      }
+  async exportarPauta(sessaoId, type = 'pdf') {
+    return await api.post(`/external/sessions/${sessaoId}/agenda`, {
+      export_type: type
     })
   }
 
-  async exportarVotosPdf(documentoId) {
-    return api.get(`/external/documents/${documentoId}/votes`);
-  }
+async exportarVotos(sessaoId, documentoId, type = 'pdf') {
+  return await api.post(`/external/sessions/${sessaoId}/votes/export`, {
+    document_id: documentoId, 
+    export_type: type
+  })
+}
 }
 
 export class ComissoesService {
