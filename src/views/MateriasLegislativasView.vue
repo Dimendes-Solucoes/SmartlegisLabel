@@ -228,16 +228,28 @@
             <p class="text-xs text-gray-500 mb-1">Em tramitação?</p>
             <p class="text-sm font-medium text-gray-900">{{ materia.document_status_movement_id != 6 ? 'Sim' : 'Não' }}</p>
           </div>
-          <div class="flex items-center gap-4">
-            <div v-for="autor in materia.authors" :key="autor.id" class="flex items-center gap-3 mb-1">
-              <img
-                :src="getAvatarUrl(autor.path_image, autor.name)"
-                :alt="autor.name"
-                class="w-8 h-8 rounded-full object-cover border border-gray-200"
-              />
-              <div>
-                <p class="text-sm font-medium text-gray-900">{{ autor.name || 'Autor não informado' }}</p>
-                <p class="text-xs text-gray-500">Autor</p>
+          <div class="col-span-2 flex flex-col gap-2">
+            <p class="text-xs text-gray-500">Autor</p>         
+            <div class="flex flex-wrap gap-4">
+              <div 
+                v-for="autor in materia.authors" 
+                :key="autor.id" 
+                class="flex items-center gap-3 bg-white/50 pr-4 py-1 rounded-full border border-gray-200 shadow-sm"
+              >
+                <img
+                  :src="getAvatarUrl(autor.path_image, autor.name)"
+                  :alt="autor.name"
+                  class="w-10 h-10 rounded-full object-cover border-2 border-white shadow-sm"
+                />
+                
+                <div class="flex flex-col justify-center">
+                  <p class="text-xs font-bold text-gray-900 leading-none mb-1">
+                    {{ autor.name || 'Não informado' }}
+                  </p>
+                  <p class="text-[10px] text-gray-500 uppercase tracking-wider leading-none">
+                    Autor
+                  </p>
+                </div>
               </div>
             </div>
           </div>
