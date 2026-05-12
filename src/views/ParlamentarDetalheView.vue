@@ -156,21 +156,18 @@
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                   {{ legislatura.title || '-' }}
                 </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-center">
+                  - </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  00/00/0000
+                  Sim </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  {{ legislatura.start_at ? formatDate(legislatura.start_at) : '-' }}
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  Sim
+                  {{ legislatura.end_at ? formatDate(legislatura.end_at) : '-' }}
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  00/00/0000
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  00/00/0000
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  00/00/0000
-                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-center">
+                  - </td>
               </tr>
             </tbody>
           </table>
