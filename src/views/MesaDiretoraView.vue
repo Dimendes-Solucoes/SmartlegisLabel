@@ -107,7 +107,7 @@ const getBoardDirector = async () => {
   try {
     loading.value = true
 
-    const response = await mesaDiretoraService.get()
+    const response = await mesaDiretoraService.get({ ignore_active: 1 }) 
     const dataList = response.data?.data || response.data || []
     
     const mesaDiretoraFiltrada = dataList.filter(item => {
