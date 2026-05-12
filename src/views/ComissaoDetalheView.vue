@@ -77,7 +77,7 @@ const getComissao = async () => {
   loading.value = true
   try {
     const response = await comissoesService.get({
-      ignore_active: true
+      ignore_active: 1
     })
     const id = parseInt(route.params.id)
     const data = response.data?.data || response.data || []
