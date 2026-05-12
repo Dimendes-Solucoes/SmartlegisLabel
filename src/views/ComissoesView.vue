@@ -160,7 +160,7 @@ const router = useRouter()
 
 const searchQuery = ref('')
 const selectedis_active = ref('')
-const showExtintas = ref(false)
+const showExtintas = ref(true)
 
 const currentPage = ref(1)
 const perPage = ref(10)
