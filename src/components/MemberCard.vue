@@ -26,6 +26,10 @@
         <span class="px-3 py-1 text-xs font-medium rounded-full" style="background-color: rgba(0, 122, 184, 0.15); color: #007AB8;">
           {{ member.category_party?.name_party || 'Partido não informado' }}
         </span>
+        <span 
+          v-if="member.function_label" class="px-3 py-1 text-xs font-medium rounded-full" style="background-color: rgba(0, 122, 184, 0.15); color: #007AB8;">
+          {{ member.function_label }}
+        </span>
       </div>
     </div>
 
