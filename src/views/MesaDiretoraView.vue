@@ -111,12 +111,11 @@ const getBoardDirector = async () => {
     const dataList = response.data?.data || response.data || []
     
     const mesaDiretoraFiltrada = dataList.filter(item => {
-      const isMesa = item.comission_name === 'MESA DIRETORA'
       const matchLegislatura = filters.value.legislature_id 
         ? item.legislature_id === filters.value.legislature_id 
         : true
 
-      return isMesa && matchLegislatura
+      return matchLegislatura
     })
     
     members.value = mesaDiretoraFiltrada.flatMap(item => item.users ?? [])
