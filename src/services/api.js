@@ -98,10 +98,16 @@ async exportarVotos(sessaoId, documentoId, type = 'pdf') {
 }
 
 export class ComissoesService {
-  async get() {
-    return await api.get('/external/comissions')
-  }
+  async get(filtros = {}) {
+    const cleanParams = Object.entries(filtros).reduce((acc, [key, value]) => {
+      if (value !== '' && value !== null && value !== undefined) {
+        acc[key] = value
+      }
+      return acc
+    }, {})
 
+    return await api.get('/external/comissions', { params: cleanParams })
+  }
 }
 
 export class MesaDiretoraService {

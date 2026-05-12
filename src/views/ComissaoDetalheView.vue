@@ -76,7 +76,9 @@ const parlamentares = computed(() => comissao.value?.users ?? [])
 const getComissao = async () => {
   loading.value = true
   try {
-    const response = await comissoesService.get()
+    const response = await comissoesService.get({
+      ignore_active: true
+    })
     const id = parseInt(route.params.id)
     const data = response.data?.data || response.data || []
     comissao.value = data.find(c => c.id === id) ?? null

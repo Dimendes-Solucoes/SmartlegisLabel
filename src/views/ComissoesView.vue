@@ -194,7 +194,7 @@ const getComissoes = async () => {
     const response = await comissoesService.get({
       search: searchQuery.value,
       is_active: selectedis_active.value,
-      showExtintas: showExtintas.value
+      ignore_active: showExtintas.value
     })
     comissoes.value = response.data?.data || response.data || []
   } catch (error) {
