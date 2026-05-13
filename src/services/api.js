@@ -111,8 +111,15 @@ export class ComissoesService {
 }
 
 export class MesaDiretoraService {
-  async get() {
-    return await api.get('/external/board-directors')
+  async get(filtros = {}) {
+    const cleanParams = Object.entries(filtros).reduce((acc, [key, value]) => {
+      if (value !== '' && value !== null && value !== undefined) {
+        acc[key] = value
+      }
+      return acc
+    }, {})
+
+    return await api.get('/external/board-directors', { params: cleanParams })
   }
 }
 

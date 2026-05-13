@@ -38,7 +38,6 @@
 
     <div v-else-if="parlamentar" class="rounded-lg shadow-sm p-8 mb-6">
       <div class="flex items-start gap-8 mb-8 bg-gray-100 p-6 rounded-xl">
-        <!-- Coluna Esquerda: Foto e Informações -->
         <div class="flex gap-6">
           <div class="flex-shrink-0">
             <img
@@ -95,10 +94,8 @@
           </div>
         </div>
 
-        <!-- Divider Vertical -->
         <div class="w-px bg-gray-300 self-stretch mx-4"></div>
 
-        <!-- Coluna Direita: Resumo -->
         <div class="flex-1 py-2">
           <h3 class="text-sm font-semibold text-gray-900 mb-3">Resumo</h3>
           <p class="text-sm text-gray-700 leading-relaxed">
@@ -134,7 +131,7 @@
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
                   Legislatura
                 </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                <th class="px-6 py-3 text-center text-xs font-medium text-gray-700 uppercase tracking-wider">
                   Nº Votos
                 </th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
@@ -146,7 +143,7 @@
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
                   Fim do mandato
                 </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                <th class="px-6 py-3 text-center text-xs font-medium text-gray-700 uppercase tracking-wider">
                   Relatorias
                 </th>
               </tr>
@@ -156,20 +153,20 @@
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                   {{ legislatura.title || '-' }}
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  00/00/0000
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-center">
+                  {{ legislatura.votes_count !== null && legislatura.votes_count !== undefined ? legislatura.votes_count : '-' }}
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                   Sim
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  00/00/0000
+                  {{ legislatura.start_at ? formatDate(legislatura.start_at) : '-' }}
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  00/00/0000
+                  {{ legislatura.end_at ? formatDate(legislatura.end_at) : '-' }}
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  00/00/0000
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-center">
+                  {{ legislatura.author_count !== null && legislatura.author_count !== undefined ? legislatura.author_count : '-' }}
                 </td>
               </tr>
             </tbody>
@@ -181,16 +178,84 @@
       </div>
 
       <div v-if="activeTab === 'mesa-diretora'">
-        <h3 class="text-lg font-semibold text-gray-900 mb-4">Mesa diretora</h3>
-        <div class="text-center py-8 text-gray-500">
-          Nenhum registro encontrado
+        <div v-if="parlamentar.boards && parlamentar.boards.length > 0" class="overflow-x-auto">
+          <table class="min-w-full">
+            <thead class="bg-gray-100">
+              <tr>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider rounded-l-lg">
+                  Cargo
+                </th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                  Legislatura
+                </th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider rounded-r-lg">
+                  Período
+                </th>
+              </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-100">
+              <tr v-for="mesa in parlamentar.boards" :key="mesa.id" class="hover:bg-gray-50">
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">
+                  {{ mesa.function_label || 'Membro' }}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                  {{ mesa.legislature?.title || 'Não informada' }}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                  {{ mesa.legislature?.start_at ? formatDate(mesa.legislature.start_at) : '00/00/0000' }} a 
+                  {{ mesa.legislature?.end_at ? formatDate(mesa.legislature.end_at) : '00/00/0000' }}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="mt-4 text-xs text-gray-500">
+            1 a {{ parlamentar.boards.length }} de {{ parlamentar.boards.length }} itens
+          </div>
+        </div>
+
+        <div v-else class="text-center py-8 text-gray-500">
+          Este parlamentar não compõe a mesa diretora.
         </div>
       </div>
 
       <div v-if="activeTab === 'comissoes'">
-        <h3 class="text-lg font-semibold text-gray-900 mb-4">Comissões</h3>
-        <div class="text-center py-8 text-gray-500">
-          Nenhuma comissão encontrada
+        <div v-if="parlamentar.comissions && parlamentar.comissions.length > 0" class="overflow-x-auto">
+          <table class="min-w-full">
+            <thead class="bg-gray-100">
+              <tr>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider rounded-l-lg">
+                  Cargo
+                </th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                  Comissão
+                </th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider rounded-r-lg">
+                  Período
+                </th>
+              </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-100">
+              <tr v-for="comissao in parlamentar.comissions" :key="comissao.id" class="hover:bg-gray-50">
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">
+                  {{ comissao.function_label || 'Membro' }}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                  {{ comissao.comission_name || 'Não informada' }}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                  {{ comissao.legislature?.start_at ? formatDate(comissao.legislature.start_at) : '00/00/0000' }} a 
+                  {{ comissao.legislature?.end_at ? formatDate(comissao.legislature.end_at) : '00/00/0000' }}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="mt-4 text-xs text-gray-500">
+            1 a {{ parlamentar.comissions.length }} de {{ parlamentar.comissions.length }} itens
+          </div>
+        </div>
+
+        <div v-else class="text-center py-8 text-gray-500">
+          Este parlamentar não faz parte de nenhuma comissão.
         </div>
       </div>
 
@@ -269,13 +334,11 @@
             </div>
           </div>
 
-          <!-- Paginação -->
           <div class="flex items-center justify-between pt-4">
             <div class="text-sm text-gray-600">
               Mostrando {{ startItemProposicoes }}-{{ endItemProposicoes }} de {{ paginationProposicoes.total }} resultados
             </div>
             <div class="flex gap-2">
-              <!-- Primeira página -->
               <button
                 @click="goToPageProposicoes(1)"
                 :disabled="paginationProposicoes.currentPage === 1"
@@ -292,7 +355,6 @@
                 </svg>
               </button>
 
-              <!-- Anterior -->
               <button
                 @click="previousPageProposicoes"
                 :disabled="paginationProposicoes.currentPage === 1"
@@ -306,7 +368,6 @@
                 Anterior
               </button>
 
-              <!-- Números das páginas -->
               <button
                 v-for="page in visiblePagesProposicoes"
                 :key="page"
@@ -322,10 +383,8 @@
                 {{ page }}
               </button>
 
-              <!-- Reticências se necessário -->
               <span v-if="showEllipsisProposicoes" class="px-3 py-2 text-gray-500">...</span>
 
-              <!-- Última página (se não estiver visível) -->
               <button
                 v-if="shouldShowLastPageProposicoes"
                 @click="goToPageProposicoes(paginationProposicoes.lastPage)"
@@ -334,7 +393,6 @@
                 {{ paginationProposicoes.lastPage }}
               </button>
 
-              <!-- Próximo -->
               <button
                 @click="nextPageProposicoes"
                 :disabled="paginationProposicoes.currentPage === paginationProposicoes.lastPage"
@@ -348,7 +406,6 @@
                 Próximo
               </button>
 
-              <!-- Última página -->
               <button
                 @click="goToPageProposicoes(paginationProposicoes.lastPage)"
                 :disabled="paginationProposicoes.currentPage === paginationProposicoes.lastPage"
@@ -380,7 +437,6 @@
         </div>
 
         <div v-else>
-          <!-- Cards de Estatísticas -->
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             <div class="rounded-lg p-6" style="background-color: #007AB8;">
               <p class="text-white text-sm mb-2">Total de documentos</p>
@@ -406,7 +462,6 @@
             </div>
           </div>
 
-          <!-- Ranking do Parlamentar -->
           <div class="bg-white rounded-lg shadow-sm p-6">
             <h3 class="text-lg font-bold text-gray-900 mb-2">Sua colocação no ranking</h3>
             <p class="text-sm text-gray-600 mb-6">Posição do parlamentar entre todos</p>
@@ -544,37 +599,12 @@ const formatDate = (dateString) => {
 }
 
 const getSituacao = (voting_result_1, voting_result_2) => {
-  // Se ambos são null → Em tramitação
-  if (voting_result_1 === null && voting_result_2 === null) {
-    return 'Em tramitação'
-  }
-  
-  // Se apenas voting_result_1 = 1 → Aprovado
-  if (voting_result_1 === 1 && (voting_result_2 === null || voting_result_2 === undefined)) {
-    return 'Aprovado'
-  }
-  
-  // Se apenas voting_result_1 = 2 → Rejeitado
-  if (voting_result_1 === 2 && (voting_result_2 === null || voting_result_2 === undefined)) {
-    return 'Rejeitado'
-  }
-  
-  // Se voting_result_1 = 1 e voting_result_2 = 1 → Aprovado
-  if (voting_result_1 === 1 && voting_result_2 === 1) {
-    return 'Aprovado'
-  }
-  
-  // Se voting_result_1 = 2 e voting_result_2 = 2 → Rejeitado
-  if (voting_result_1 === 2 && voting_result_2 === 2) {
-    return 'Rejeitado'
-  }
-  
-  // Se voting_result_1 = 1 e voting_result_2 = 2 → Indefinido (tratado como Em tramitação)
-  // Se voting_result_1 = 2 e voting_result_2 = 1 → Indefinido (tratado como Em tramitação)
-  if ((voting_result_1 === 1 && voting_result_2 === 2) || (voting_result_1 === 2 && voting_result_2 === 1)) {
-    return 'Em tramitação'
-  }
-  
+  if (voting_result_1 === null && voting_result_2 === null) return 'Em tramitação'
+  if (voting_result_1 === 1 && (voting_result_2 === null || voting_result_2 === undefined)) return 'Aprovado'
+  if (voting_result_1 === 2 && (voting_result_2 === null || voting_result_2 === undefined)) return 'Rejeitado'
+  if (voting_result_1 === 1 && voting_result_2 === 1) return 'Aprovado'
+  if (voting_result_1 === 2 && voting_result_2 === 2) return 'Rejeitado'
+  if ((voting_result_1 === 1 && voting_result_2 === 2) || (voting_result_1 === 2 && voting_result_2 === 1)) return 'Em tramitação'
   return 'Em tramitação'
 }
 
@@ -681,7 +711,6 @@ const getRelatorias = async () => {
   }
 }
 
-// Watch para carregar proposições quando a aba for ativada
 watch(activeTab, (newTab) => {
   if (newTab === 'proposicoes' && proposicoes.value.length === 0) {
     getProposicoes()
