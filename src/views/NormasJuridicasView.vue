@@ -26,88 +26,103 @@
       </div>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-2">
-          Data de publicação
-        </label>
-        <div class="relative">
-          <input
-            type="date"
-            v-model="filters.date"
-            class="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue focus:border-transparent"
-          />
-        </div>
-      </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-6">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              Data de publicação
+            </label>
+            <div class="relative">
+              <input
+                type="date"
+                v-model="filters.date"
+                class="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue focus:border-transparent"
+              />
+            </div>
+          </div>
 
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-2">
-          Tipo de norma
-        </label>
-        <div class="relative">
-          <select
-            v-model.number="filters.norm_type_id"
-            class="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg appearance-none focus:outline-none focus:ring-2 focus:ring-brand-blue focus:border-transparent"
-          >
-            <option value="">Selecione</option>
-            <option
-              v-for="type in normTypes"
-              :key="type.id"
-              :value="type.id"
-            >
-              {{ type.name }}
-            </option>
-          </select>
-          <svg class="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-          </svg>
-        </div>
-      </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              Tipo de norma
+            </label>
+            <div class="relative">
+              <select
+                v-model.number="filters.norm_type_id"
+                class="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg appearance-none focus:outline-none focus:ring-2 focus:ring-brand-blue focus:border-transparent"
+              >
+                <option value="">Selecione</option>
+                <option
+                  v-for="type in normTypes"
+                  :key="type.id"
+                  :value="type.id"
+                >
+                  {{ type.name }}
+                </option>
+              </select>
+              <svg class="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+              </svg>
+            </div>
+          </div>
 
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-2">
-          Assunto
-        </label>
-        <div class="relative">
-          <select
-            v-model.number="filters.norm_subject_id"
-            class="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg appearance-none focus:outline-none focus:ring-2 focus:ring-brand-blue focus:border-transparent"
-          >
-            <option value="">Selecione</option>
-            <option
-              v-for="subject in normSubjects"
-              :key="subject.id"
-              :value="subject.id"
-            >
-              {{ subject.name }}
-            </option>
-          </select>
-          <svg class="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-          </svg>
-        </div>
-      </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              Assunto
+            </label>
+            <div class="relative">
+              <select
+                v-model.number="filters.norm_subject_id"
+                class="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg appearance-none focus:outline-none focus:ring-2 focus:ring-brand-blue focus:border-transparent"
+              >
+                <option value="">Selecione</option>
+                <option
+                  v-for="subject in normSubjects"
+                  :key="subject.id"
+                  :value="subject.id"
+                >
+                  {{ subject.name }}
+                </option>
+              </select>
+              <svg class="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+              </svg>
+            </div>
+          </div>
 
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-2">
-          Situação
-        </label>
-        <div class="relative">
-          <select
-            v-model="filters.is_active"
-            class="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg appearance-none focus:outline-none focus:ring-2 focus:ring-brand-blue focus:border-transparent"
-          >
-            <option value="">Selecione</option>
-            <option value="true">Em vigor</option>
-            <option value="false">Não em vigor</option>
-          </select>
-          <svg class="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-          </svg>
-        </div>
-      </div>
-    </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              Situação
+            </label>
+            <div class="relative">
+              <select
+                v-model="filters.is_active"
+                class="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg appearance-none focus:outline-none focus:ring-2 focus:ring-brand-blue focus:border-transparent"
+              >
+                <option value="">Selecione</option>
+                <option value="true">Em vigor</option>
+                <option value="false">Não em vigor</option>
+              </select>
+              <svg class="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+              </svg>
+            </div>
+          </div>
 
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              Ano
+            </label>
+            <div class="relative">
+              <input
+                type="number"
+                v-model="filters.year"
+                placeholder="Digite um ano"
+                min="1900"
+                max="2100"
+                class="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue focus:border-transparent"
+              />
+            </div>
+          </div>
+        </div>
     <div class="mb-8">
       <label class="block text-sm font-medium text-gray-700 mb-2">
         Buscar
@@ -179,7 +194,7 @@
           </div>
           <div>
             <p class="text-xs text-gray-500 mb-1">Data de publicação</p>
-            <p class="text-sm font-medium text-gray-900">{{ formatDate(norma.created_at) }}</p>
+            <p class="text-sm font-medium text-gray-900">{{ formatDate(norma.publication_date) }}</p>
           </div>
           <div>
             <p class="text-xs text-gray-500 mb-1">Assunto</p>
@@ -327,6 +342,7 @@ let debounceTimeout = null
 
 const filters = ref({
   date: '',
+  year: '',
   norm_type_id: '',
   norm_subject_id: '',
   is_active: ''
@@ -418,6 +434,9 @@ const getNormas = async (page = 1) => {
     if (filters.value.date) {
       params.date = filters.value.date
     }
+    if (filters.value.year) {
+      params.year = filters.value.year
+    }
     if (filters.value.norm_type_id) {
       params.norm_type_id = filters.value.norm_type_id
     }
@@ -458,7 +477,7 @@ watch(() => searchQuery.value, () => {
 })
 
 watch(
-  () => [filters.value.date, filters.value.norm_type_id, filters.value.norm_subject_id, filters.value.is_active],
+  () => [filters.value.date, filters.value.year, filters.value.norm_type_id, filters.value.norm_subject_id, filters.value.is_active],
   () => {
     if (hasSearched.value) {
       getNormas(1)
@@ -473,6 +492,7 @@ const handleSearch = () => {
 const clearFilters = () => {
   filters.value = {
     date: '',
+    year: '',
     norm_type_id: '',
     norm_subject_id: '',
     is_active: ''
