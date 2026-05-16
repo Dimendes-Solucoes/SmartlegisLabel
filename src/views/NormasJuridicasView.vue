@@ -179,7 +179,7 @@
           </div>
           <div>
             <p class="text-xs text-gray-500 mb-1">Data de publicação</p>
-            <p class="text-sm font-medium text-gray-900">{{ formatDate(norma.created_at) }}</p>
+            <p class="text-sm font-medium text-gray-900">{{ formatDate(norma.publication_date) }}</p>
           </div>
           <div>
             <p class="text-xs text-gray-500 mb-1">Assunto</p>
