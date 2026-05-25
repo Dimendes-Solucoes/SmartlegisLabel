@@ -1,0 +1,28 @@
+services:
+  app:
+    build:
+      context: .
+      target: production
+      args:
+        VITE_API_URL: ${VITE_API_URL}
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL}
+        VITE_APP_ENV: ${VITE_APP_ENV:-production}
+        VITE_DEBUG: ${VITE_DEBUG:-false}
+        VITE_S3_HOST: ${VITE_S3_HOST}
+    ports:
+      - "8080:80"
+    restart: unless-stopped
+
+  dev:
+    image: node:22-alpine
+    working_dir: /app
+    volumes:
+      - .:/app
+      - /app/node_modules
+    ports:
+      - "5173:5173"
+    env_file:
+      - .env
+    command: sh -c "npm install && npm run dev -- --host"
+    profiles:
+      - dev
