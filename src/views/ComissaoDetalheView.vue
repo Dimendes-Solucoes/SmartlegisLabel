@@ -55,6 +55,73 @@
         />
       </div>
     </template>
+
+    <div class="mt-10">
+      <h2 class="text-xl font-bold text-gray-900 mb-4">Documentos</h2>
+
+      <div v-if="loadingDocumentos" class="flex items-center justify-center py-12">
+        <div class="flex flex-col items-center gap-4">
+          <div class="w-10 h-10 border-4 border-gray-200 border-t-brand-blue rounded-full animate-spin"></div>
+          <p class="text-gray-600 text-sm font-medium">Carregando documentos...</p>
+        </div>
+      </div>
+
+      <div v-else-if="documentos.length === 0" class="text-center py-10 text-gray-500">
+        Nenhum documento encontrado para esta comissão.
+      </div>
+
+      <div v-else class="space-y-4">
+        <div
+          v-for="item in documentos"
+          :key="item.id"
+          class="bg-white rounded-lg shadow-sm p-6"
+        >
+          <h3 class="text-lg font-bold text-gray-900 mb-4">
+            {{ item.document?.name || '—' }}
+          </h3>
+
+          <div class="flex items-center gap-6 flex-wrap">
+            <div>
+              <p class="text-xs text-gray-500 mb-1">Data</p>
+              <p class="text-sm font-medium text-gray-900">{{ formatDate(item.created_at) }}</p>
+            </div>
+            <div v-if="item.document?.authors?.length > 0">
+              <p class="text-xs text-gray-500 mb-1">Autor(es)</p>
+              <p class="text-sm font-medium text-gray-900">
+                {{ item.document.authors.map(a => a?.name).filter(Boolean).join(', ') }}
+              </p>
+            </div>
+
+            <div class="ml-auto flex gap-2 flex-wrap">
+              <a
+                v-if="item.document?.attachment"
+                :href="S3_HOST + item.document.attachment"
+                target="_blank"
+                class="px-4 py-2 rounded-lg text-sm font-medium text-white hover:opacity-90 transition-opacity inline-flex items-center gap-2"
+                style="background-color: #007AB8;"
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                Documento em PDF
+              </a>
+              <a
+                v-if="item.parecer_pdf"
+                :href="S3_HOST + item.parecer_pdf"
+                target="_blank"
+                class="px-4 py-2 rounded-lg text-sm font-medium hover:opacity-90 transition-opacity inline-flex items-center gap-2 border"
+                style="color: #007AB8; border-color: #007AB8;"
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                Parecer em PDF
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -70,6 +137,8 @@ const S3_HOST = import.meta.env.VITE_S3_HOST
 
 const comissao = ref(null)
 const loading = ref(true)
+const documentos = ref([])
+const loadingDocumentos = ref(false)
 
 const parlamentares = computed(() => comissao.value?.users ?? [])
 
@@ -89,11 +158,31 @@ const getComissao = async () => {
   }
 }
 
+const getDocumentos = async () => {
+  loadingDocumentos.value = true
+  try {
+    const id = parseInt(route.params.id)
+    const response = await comissoesService.getDocuments(id)
+    documentos.value = response.data ?? []
+  } catch (error) {
+    console.error('Erro ao buscar documentos da comissão:', error)
+    documentos.value = []
+  } finally {
+    loadingDocumentos.value = false
+  }
+}
+
 onMounted(() => {
   getComissao()
+  getDocumentos()
 })
 
 const goToParlamentar = (id) => {
   router.push({ name: 'parlamentar-detalhe', params: { id } })
+}
+
+const formatDate = (dateString) => {
+  if (!dateString) return '—'
+  return new Date(dateString).toLocaleDateString('pt-BR')
 }
 </script>

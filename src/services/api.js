@@ -108,6 +108,10 @@ export class ComissoesService {
 
     return await api.get('/external/comissions', { params: cleanParams })
   }
+
+  async getDocuments(id) {
+    return await api.get(`/external/comissions/${id}/documents`)
+  }
 }
 
 export class MesaDiretoraService {
