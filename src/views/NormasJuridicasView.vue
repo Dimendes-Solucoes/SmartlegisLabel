@@ -376,10 +376,9 @@ const endItem = computed(() => {
   return end > pagination.value.total ? pagination.value.total : end
 })
 
-// FUNÇÃO COMPUTADA PARA GERAR OS ANOS
 const years = computed(() => {
   const currentYear = new Date().getFullYear()
-  const startYear = 2000
+  const startYear = 1950
   const endYear = currentYear + 5
   const yearList = []
 
