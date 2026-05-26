@@ -249,7 +249,7 @@ const shouldShowLastPage = computed(() => {
 const years = computed(() => {
   const currentYear = new Date().getFullYear()
   const yearList = []
-  for (let year = currentYear; year >= 2000; year--) {
+  for (let year = currentYear; year >= 1950; year--) {
     yearList.push(year)
   }
   return yearList
