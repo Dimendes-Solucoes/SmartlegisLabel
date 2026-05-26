@@ -140,7 +140,7 @@
             </div>
           </div>
 
-          <div class="flex gap-3 flex-wrap">
+          <div class="flex gap-3 flex-wrap items-center">
             <button @click.stop class="px-4 py-2 rounded-lg text-sm font-medium bg-white border hover:bg-gray-50 transition-colors flex items-center gap-2" style="cursor: not-allowed; color: #007AB8; border-color: #007AB8;" disabled>
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
@@ -180,22 +180,39 @@
               </svg>
             </button>
 
-            <button 
-              @click.stop="baixarPauta(sessao)"
-              :disabled="sessao.isCarregandoPauta"
-              class="px-4 py-2 rounded-lg text-sm font-medium text-white hover:opacity-90 transition-opacity flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed" 
-              style="background-color: #007AB8;"
-            >
-              <div v-if="sessao.isCarregandoPauta" class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-              <svg v-else class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
-              Pauta
-              <svg v-if="!sessao.isCarregandoPauta" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-              </svg>
-            </button>
-          </div>
+            <div class="relative inline-block text-left">
+              <button 
+                @click.stop="toggleDropdown(sessao.id)"
+                :disabled="sessao.isCarregandoPauta"
+                class="px-4 py-2 rounded-lg text-sm font-medium text-white hover:opacity-90 transition-opacity flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed" 
+                style="background-color: #007AB8;"
+              >
+                <div v-if="sessao.isCarregandoPauta" class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                <svg v-else class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                Pauta
+                <svg v-if="!sessao.isCarregandoPauta" class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+
+              <div 
+                v-if="activeDropdown === sessao.id" 
+                class="absolute right-0 mt-2 w-40 bg-white border border-gray-200 rounded-lg shadow-xl z-50 overflow-hidden"
+              >
+                <button @click.stop="baixarPauta(sessao, 'pdf')" class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2 border-b border-gray-50">
+                  <span class="w-2 h-2 rounded-full bg-red-500"></span> PDF
+                </button>
+                <button @click.stop="baixarPauta(sessao, 'xlsx')" class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2 border-b border-gray-50">
+                  <span class="w-2 h-2 rounded-full bg-green-500"></span> XLSX
+                </button>
+                <button @click.stop="baixarPauta(sessao, 'txt')" class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2">
+                  <span class="w-2 h-2 rounded-full bg-gray-400"></span> TXT
+                </button>
+              </div>
+            </div>
+            </div>
         </div>
       </div>
     </div>
@@ -293,7 +310,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed, watch } from 'vue'
+import { ref, onMounted, computed, watch, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { sessoesService } from '@/services/api'
 import { convertToS3Url } from '@/utils/image-url'
@@ -316,6 +333,16 @@ const pagination = ref({
   perPage: 10,
   total: 0
 })
+
+const activeDropdown = ref(null)
+
+const toggleDropdown = (id) => {
+  activeDropdown.value = activeDropdown.value === id ? null : id
+}
+
+const closeAllDropdowns = (e) => {
+  if (!e.target.closest('.relative')) activeDropdown.value = null
+}
 
 const startItem = computed(() => {
   if (pagination.value.total === 0) return 0
@@ -369,6 +396,11 @@ const scrollToTop = () => {
 
 onMounted(() => {
   getSessions()
+  window.addEventListener('click', closeAllDropdowns)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('click', closeAllDropdowns)
 })
 
 const formatDateTimeExtended = (dateTimeString) => {
@@ -458,16 +490,17 @@ const baixarAta = async (sessao) => {
   }
 }
 
-const baixarPauta = async (sessao) => {
+const baixarPauta = async (sessao, tipo = 'pdf') => {
+  activeDropdown.value = null 
   try {
     sessao.isCarregandoPauta = true
     
-    const response = await sessoesService.exportarPauta(sessao.id, 'pdf')
+    const response = await sessoesService.exportarPauta(sessao.id, tipo)
     
     const urlDownload = response.data?.data || response.data?.url || response.data
     
     if (!urlDownload || typeof urlDownload !== 'string') {
-       alert('Esta sessão ainda não possui uma pauta disponível para exportação.')
+       alert(`Esta sessão ainda não possui uma pauta disponível para exportação em ${tipo.toUpperCase()}.`)
        return
     }
 
