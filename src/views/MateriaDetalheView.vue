@@ -69,17 +69,56 @@
           <div>
             <p class="text-xs text-gray-500 mb-1">Em tramitação?</p>
             <p class="text-sm font-medium text-gray-900">{{ materia.document_status_movement_id != 6 ? 'Sim' : 'Não' }}</p>
-          </div>       
-          <div v-if="materia.authors && materia.authors.length > 0" class="flex items-center gap-2">
-            <img
-              :src="getAvatarUrl(materia.authors[0].path_image, materia.authors[0].name)"
-              :alt="materia.authors[0].name"
-              class="w-8 h-8 rounded-full object-cover border border-gray-200 shadow-sm flex-shrink-0"
-            />
-            <div>
-              <p class="text-sm font-medium text-gray-900">{{ materia.authors[0].name || 'Autor' }}</p>
-              <p class="text-xs text-gray-500">Autor</p>
+          </div>
+
+          <div class="flex items-center gap-4 relative col-span-2 md:col-span-1">
+            <div v-if="materia.authors && materia.authors.length > 0" class="flex items-center gap-3 w-full">
+              <div class="flex -space-x-3 rtl:space-x-reverse relative flex-shrink-0">
+                <img
+                  :src="getAvatarUrl(materia.authors[0].path_image, materia.authors[0].nickname || materia.authors[0].name)"
+                  :alt="materia.authors[0].nickname || materia.authors[0].name"
+                  class="w-10 h-10 rounded-full border-2 border-gray-100 object-cover relative z-20"
+                />
+                
+                <div v-if="materia.authors.length > 1" class="relative z-10">
+                  <button 
+                    @click.stop="toggleAuthors(materia.id)"
+                    class="flex items-center justify-center w-10 h-10 rounded-full bg-gray-200 border-2 border-gray-100 text-xs font-bold text-gray-600 hover:bg-gray-300 transition-colors"
+                    style="margin-left: -10px;"
+                  >
+                    +{{ materia.authors.length - 1 }}
+                  </button>
+
+                  <div 
+                    v-if="activeAuthorsMateria === materia.id"
+                    class="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-56 bg-white border border-gray-200 rounded-lg shadow-xl z-50 p-2 max-h-48 overflow-y-auto cursor-default"
+                  >
+                    <div class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 px-2 pt-1 border-b pb-1">
+                      Todos os Autores
+                    </div>
+                    <div 
+                      v-for="autor in materia.authors" 
+                      :key="autor.id" 
+                      class="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-md transition-colors"
+                    >
+                      <img
+                        :src="getAvatarUrl(autor.path_image, autor.nickname || autor.name)"
+                        class="w-8 h-8 rounded-full object-cover border border-gray-200 flex-shrink-0"
+                      />
+                      <p class="text-sm font-medium text-gray-900 truncate">{{ autor.nickname || autor.name }}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="min-w-0">
+                <p class="text-sm font-medium text-gray-900 truncate">
+                  {{ materia.authors[0].nickname || materia.authors[0].name }}
+                </p>
+                <p class="text-xs text-gray-500">Autor{{ materia.authors.length > 1 ? ' Principal' : '' }}</p>
+              </div>
             </div>
+            <div v-else class="text-sm text-gray-500">Sem autores</div>
           </div>
         </div>
 
@@ -95,9 +134,6 @@
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
             Matéria em PDF
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-            </svg>
           </a>
         </div>
       </div>
@@ -136,18 +172,14 @@
         </div>
       </div>
     </div>
-
-    <div v-else class="text-center py-8">
-      <p class="text-gray-500">Matéria não encontrada</p>
-    </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { materiasService } from '@/services/api'
-import { getAvatarUrl } from '@/utils/image-url' 
+import { getAvatarUrl } from '@/utils/image-url'
 
 const route = useRoute()
 const materiaId = route.params.id
@@ -155,6 +187,24 @@ const S3_HOST = import.meta.env.VITE_S3_HOST
 
 const materia = ref(null)
 const loading = ref(true)
+const activeAuthorsMateria = ref(null)
+
+const toggleAuthors = (id) => {
+  activeAuthorsMateria.value = activeAuthorsMateria.value === id ? null : id
+}
+
+const closeAllPopovers = (e) => {
+  if (!e.target.closest('.relative')) activeAuthorsMateria.value = null
+}
+
+onMounted(() => {
+  getMateria()
+  window.addEventListener('click', closeAllPopovers)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('click', closeAllPopovers)
+})
 
 const formatDate = (dateString) => {
   if (!dateString) return 'N/A'
@@ -196,8 +246,4 @@ const getMateria = async () => {
     loading.value = false
   }
 }
-
-onMounted(() => {
-  getMateria()
-})
 </script>
