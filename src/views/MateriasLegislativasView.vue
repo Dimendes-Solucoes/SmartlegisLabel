@@ -190,7 +190,7 @@
       <div
         v-for="materia in materias"
         :key="materia.id"
-        class="bg-gray-100 rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow cursor-pointer"
+        class="bg-gray-100 rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow cursor-pointer relative"
         @click="goToMateria(materia.id)"
       >
 
@@ -228,19 +228,65 @@
             <p class="text-xs text-gray-500 mb-1">Em tramitação?</p>
             <p class="text-sm font-medium text-gray-900">{{ materia.document_status_movement_id != 6 ? 'Sim' : 'Não' }}</p>
           </div>
-          <div class="flex items-center gap-4">
-            <div v-for="autor in materia.authors" :key="autor.id" class="flex items-center gap-3 mb-1">
-              <img
-                :src="getAvatarUrl(autor.path_image, autor.name)"
-                :alt="autor.name"
-                class="w-8 h-8 rounded-full object-cover border border-gray-200"
-              />
-              <div>
-                <p class="text-sm font-medium text-gray-900">{{ autor.name || 'Autor não informado' }}</p>
-                <p class="text-xs text-gray-500">Autor</p>
+          
+          <div class="flex items-center gap-4 relative col-span-2">
+            <div v-if="materia.authors && materia.authors.length > 0" class="flex items-center gap-3 w-full" @click.stop>
+              
+              <div class="flex items-center gap-3 w-full">
+                <div class="flex -space-x-3 rtl:space-x-reverse relative flex-shrink-0">
+                  <img
+                    :src="getAvatarUrl(materia.authors[0].path_image, materia.authors[0].nickname || materia.authors[0].name)"
+                    :alt="materia.authors[0].nickname || materia.authors[0].name"
+                    class="w-10 h-10 rounded-full border-2 border-gray-100 object-cover relative z-20"
+                  />
+                  
+                  <div v-if="materia.authors.length > 1" class="relative z-10">
+                    <button 
+                      @click="toggleAuthors(materia.id)"
+                      class="flex items-center justify-center w-10 h-10 rounded-full bg-gray-200 border-2 border-gray-100 text-xs font-medium text-gray-700 hover:bg-gray-300 transition-colors"
+                      title="Ver todos os autores"
+                    >
+                      +{{ materia.authors.length - 1 }}
+                    </button>
+
+                    <div 
+                      v-if="activeAuthorsMateria === materia.id"
+                      class="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 w-56 bg-white border border-gray-200 rounded-lg shadow-xl z-50 p-2 max-h-48 overflow-y-auto cursor-default"
+                    >
+                      <div class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 px-2 pt-1 border-b pb-1">
+                        Todos os Autores
+                      </div>
+                      <div 
+                        v-for="autor in materia.authors" 
+                        :key="autor.id" 
+                        class="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-md transition-colors"
+                      >
+                        <img
+                          :src="getAvatarUrl(autor.path_image, autor.nickname || autor.name)"
+                          :alt="autor.nickname || autor.name"
+                          class="w-8 h-8 rounded-full object-cover border border-gray-200 flex-shrink-0"
+                        />
+                        <p class="text-sm font-medium text-gray-900 truncate" :title="autor.nickname || autor.name">
+                          {{ autor.nickname || autor.name }}
+                        </p>
+                      </div>
+                      <div class="absolute -bottom-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-white border-b border-r border-gray-200 transform rotate-45"></div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="min-w-0 flex-1">
+                  <p class="text-sm font-medium text-gray-900 truncate" :title="materia.authors[0].nickname || materia.authors[0].name">
+                    {{ materia.authors[0].nickname || materia.authors[0].name }}
+                  </p>
+                  <p class="text-xs text-gray-500">Autor{{ materia.authors.length > 1 ? ' Principal' : '' }}</p>
+                </div>
               </div>
+
             </div>
+            <div v-else class="text-sm text-gray-500">Sem autores</div>
           </div>
+
         </div>
         <div class="flex gap-3 justify-end">
           <button 
@@ -358,7 +404,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed, watch } from 'vue'
+import { ref, onMounted, computed, watch, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { materiasService, parlamentaresService } from '@/services/api'
 import { getAvatarUrl } from '@/utils/image-url' 
@@ -374,10 +420,31 @@ const parlamentares = ref([])
 const S3_HOST = import.meta.env.VITE_S3_HOST
 let debounceTimeout = null
 
+const activeAuthorsMateria = ref(null)
+
+const toggleAuthors = (id) => {
+  if (activeAuthorsMateria.value === id) {
+    activeAuthorsMateria.value = null
+  } else {
+    activeAuthorsMateria.value = id
+  }
+}
+
+const closeAllPopovers = (e) => {
+  if (!e.target.closest('.relative')) {
+    activeAuthorsMateria.value = null
+  }
+}
+
 onMounted(() => {
   getDocuments()
   getTypes()
   getParlamentares()
+  window.addEventListener('click', closeAllPopovers)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('click', closeAllPopovers)
 })
 
 const filters = ref({
