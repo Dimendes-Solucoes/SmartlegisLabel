@@ -69,19 +69,13 @@
           <div>
             <p class="text-xs text-gray-500 mb-1">Em tramitação?</p>
             <p class="text-sm font-medium text-gray-900">{{ materia.document_status_movement_id != 6 ? 'Sim' : 'Não' }}</p>
-          </div>
+          </div>       
           <div v-if="materia.authors && materia.authors.length > 0" class="flex items-center gap-2">
             <img
-              v-if="materia.authors[0].path_image"
-              :src="S3_HOST + materia.authors[0].path_image"
+              :src="getAvatarUrl(materia.authors[0].path_image, materia.authors[0].name)"
               :alt="materia.authors[0].name"
-              class="w-8 h-8 rounded-full object-cover"
+              class="w-8 h-8 rounded-full object-cover border border-gray-200 shadow-sm flex-shrink-0"
             />
-            <div v-else class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
-              <svg class="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
-              </svg>
-            </div>
             <div>
               <p class="text-sm font-medium text-gray-900">{{ materia.authors[0].name || 'Autor' }}</p>
               <p class="text-xs text-gray-500">Autor</p>
@@ -153,6 +147,7 @@
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { materiasService } from '@/services/api'
+import { getAvatarUrl } from '@/utils/image-url' 
 
 const route = useRoute()
 const materiaId = route.params.id
