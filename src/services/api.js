@@ -109,8 +109,18 @@ export class ComissoesService {
     return await api.get('/external/comissions', { params: cleanParams })
   }
 
-  async getDocuments(id) {
-    return await api.get(`/external/comissions/${id}/documents`)
+  async getDocuments(id, filtros = {}) {
+    const cleanParams = Object.entries(filtros).reduce((acc, [key, value]) => {
+      if (value !== '' && value !== null && value !== undefined) {
+        acc[key] = value
+      }
+      return acc
+    }, {})
+    return await api.get(`/external/comissions/${id}/documents`, { params: cleanParams })
+  }
+
+  async getDocumentTypes() {
+    return await api.get('/external/comissions/document-types')
   }
 }
 
