@@ -67,7 +67,7 @@
               v-model="filters.ano"
               class="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg appearance-none focus:outline-none focus:ring-2 focus:ring-brand-blue"
             >
-              <option value="">Selecione</option>
+              <option value="">Todos os anos</option>
               <option v-for="year in years" :key="year" :value="year">{{ year }}</option>
             </select>
             <svg class="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -83,7 +83,7 @@
               v-model="filters.tipo"
               class="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg appearance-none focus:outline-none focus:ring-2 focus:ring-brand-blue"
             >
-              <option value="">Selecione</option>
+              <option value="">Todos os tipos</option>
               <option v-for="tipo in tiposDocumento" :key="tipo.id" :value="tipo.id">{{ tipo.name }}</option>
             </select>
             <svg class="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -104,7 +104,7 @@
         <div class="grid grid-cols-12 gap-4 px-6 py-3 bg-gray-100 border-b border-gray-200">
           <div class="col-span-2 text-sm font-medium text-gray-700">Data</div>
           <div class="col-span-2 text-sm font-medium text-gray-700">Tipo</div>
-          <div class="col-span-5 text-sm font-medium text-gray-700">Nome do documento</div>
+          <div class="col-span-5 text-sm font-medium text-gray-700">Objeto</div>
           <div class="col-span-3 text-right text-sm font-medium text-gray-700 pr-2">Ações</div>
         </div>
 
@@ -216,7 +216,7 @@ const loadingDocumentos = ref(false)
 const tiposDocumento = ref([])
 
 const filters = ref({
-  ano: new Date().getFullYear(),
+  ano: '',
   tipo: ''
 })
 
