@@ -156,7 +156,7 @@
               style="color: #007AB8; border-color: #007AB8;"
             >
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
               </svg>
               Votação
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -167,10 +167,13 @@
             <button 
               @click.stop="baixarAta(sessao)"
               :disabled="sessao.isCarregandoAta"
-              class="px-4 py-2 rounded-lg text-sm font-medium bg-white border hover:bg-gray-50 transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed" 
-              style="color: #007AB8; border-color: #007AB8;"
+              :class="[
+                'px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed border',
+                hasAta(sessao) ? 'text-white hover:opacity-90' : 'bg-white hover:bg-gray-50'
+              ]"
+              :style="hasAta(sessao) ? 'background-color: #007AB8; border-color: #007AB8;' : 'color: #007AB8; border-color: #007AB8;'"
             >
-              <div v-if="sessao.isCarregandoAta" class="w-4 h-4 border-2 border-[#007AB8] border-t-transparent rounded-full animate-spin"></div>
+              <div v-if="sessao.isCarregandoAta" :class="['w-4 h-4 border-2 border-t-transparent rounded-full animate-spin', hasAta(sessao) ? 'border-white' : 'border-[#007AB8]']"></div>
               <svg v-else class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
@@ -444,6 +447,11 @@ const formatDateTimeExtended = (dateTimeString) => {
   const minutos = String(data.getMinutes()).padStart(2, '0')
 
   return `${dia} de ${mes} de ${ano} (${diaSemana}) às ${horas}:${minutos} horas`
+}
+
+
+const hasAta = (sessao) => {
+  return sessao.atas_count > 0;
 }
 
 const sessoes = ref([])
