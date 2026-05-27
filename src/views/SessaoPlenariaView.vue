@@ -1,5 +1,5 @@
 <template>
-  <div class="max-w-7xl mx-auto px-6 py-8">
+  <div class="max-w-7xl mx-auto px-6 py-8 relative">
     <nav class="text-sm mb-6">
       <ol class="flex items-center gap-2 text-gray-600">
         <li>
@@ -156,7 +156,7 @@
               style="color: #007AB8; border-color: #007AB8;"
             >
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
               </svg>
               Votação
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -167,10 +167,13 @@
             <button 
               @click.stop="baixarAta(sessao)"
               :disabled="sessao.isCarregandoAta"
-              class="px-4 py-2 rounded-lg text-sm font-medium bg-white border hover:bg-gray-50 transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed" 
-              style="color: #007AB8; border-color: #007AB8;"
+              :class="[
+                'px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed border',
+                hasAta(sessao) ? 'text-white hover:opacity-90' : 'bg-white hover:bg-gray-50'
+              ]"
+              :style="hasAta(sessao) ? 'background-color: #007AB8; border-color: #007AB8;' : 'color: #007AB8; border-color: #007AB8;'"
             >
-              <div v-if="sessao.isCarregandoAta" class="w-4 h-4 border-2 border-[#007AB8] border-t-transparent rounded-full animate-spin"></div>
+              <div v-if="sessao.isCarregandoAta" :class="['w-4 h-4 border-2 border-t-transparent rounded-full animate-spin', hasAta(sessao) ? 'border-white' : 'border-[#007AB8]']"></div>
               <svg v-else class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
@@ -212,7 +215,7 @@
                 </button>
               </div>
             </div>
-            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -306,6 +309,11 @@
         </button>
       </div>
     </div>
+    <AppToast 
+      :show="toast.show" 
+      :message="toast.message" 
+      @close="toast.show = false" 
+    />
   </div>
 </template>
 
@@ -315,10 +323,22 @@ import { useRouter } from 'vue-router'
 import { sessoesService } from '@/services/api'
 import { convertToS3Url } from '@/utils/image-url'
 import { baixarArquivoViaLink } from '@/utils/file-helper'
+import AppToast from '@/components/AppToast.vue'
 
 const S3_HOST = import.meta.env.VITE_S3_HOST || ''
-
 const router = useRouter()
+const toast = ref({ show: false, message: '' })
+let toastTimeout = null
+
+const showToast = (message) => {
+  toast.value.message = message
+  toast.value.show = true
+  
+  if (toastTimeout) clearTimeout(toastTimeout)
+  toastTimeout = setTimeout(() => {
+    toast.value.show = false
+  }, 4000) 
+}
 
 const filters = ref({
   name: '',
@@ -401,6 +421,7 @@ onMounted(() => {
 
 onUnmounted(() => {
   window.removeEventListener('click', closeAllDropdowns)
+  if (toastTimeout) clearTimeout(toastTimeout)
 })
 
 const formatDateTimeExtended = (dateTimeString) => {
@@ -426,6 +447,11 @@ const formatDateTimeExtended = (dateTimeString) => {
   const minutos = String(data.getMinutes()).padStart(2, '0')
 
   return `${dia} de ${mes} de ${ano} (${diaSemana}) às ${horas}:${minutos} horas`
+}
+
+
+const hasAta = (sessao) => {
+  return sessao.atas_count > 0;
 }
 
 const sessoes = ref([])
@@ -475,7 +501,7 @@ const baixarAta = async (sessao) => {
     const caminhoArquivo = documentoInfo?.attachment
     
     if (!caminhoArquivo) {
-       alert('Esta sessão ainda não possui o arquivo PDF da Ata anexado.')
+       showToast('Esta sessão não possui o arquivo da Ata vinculado.')
        return
     }
 
@@ -484,7 +510,7 @@ const baixarAta = async (sessao) => {
     
   } catch (error) {
     console.error('Erro ao abrir a Ata:', error)
-    alert('Não foi possível acessar a Ata.')
+    showToast('Não foi possível acessar a Ata no momento.')
   } finally {
     sessao.isCarregandoAta = false
   }
@@ -500,7 +526,7 @@ const baixarPauta = async (sessao, tipo = 'pdf') => {
     const urlDownload = response.data?.data || response.data?.url || response.data
     
     if (!urlDownload || typeof urlDownload !== 'string') {
-       alert(`Esta sessão ainda não possui uma pauta disponível para exportação em ${tipo.toUpperCase()}.`)
+       showToast(`Esta sessão ainda não possui pauta em ${tipo.toUpperCase()}.`)
        return
     }
 
@@ -508,7 +534,7 @@ const baixarPauta = async (sessao, tipo = 'pdf') => {
     
   } catch (error) {
     console.error('Erro ao baixar a Pauta:', error)
-    alert('Não foi possível gerar a Pauta no momento.')
+    showToast('Não foi possível gerar a Pauta no momento.')
   } finally {
     sessao.isExportando = false 
     sessao.isCarregandoPauta = false
