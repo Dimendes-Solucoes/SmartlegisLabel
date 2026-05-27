@@ -1,5 +1,5 @@
 <template>
-  <div class="max-w-7xl mx-auto px-6 py-8">
+  <div class="max-w-7xl mx-auto px-6 py-8 relative">
     <nav class="text-sm mb-6">
       <ol class="flex items-center gap-2 text-gray-600">
         <li>
@@ -212,7 +212,7 @@
                 </button>
               </div>
             </div>
-            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -306,6 +306,11 @@
         </button>
       </div>
     </div>
+    <AppToast 
+      :show="toast.show" 
+      :message="toast.message" 
+      @close="toast.show = false" 
+    />
   </div>
 </template>
 
@@ -315,10 +320,22 @@ import { useRouter } from 'vue-router'
 import { sessoesService } from '@/services/api'
 import { convertToS3Url } from '@/utils/image-url'
 import { baixarArquivoViaLink } from '@/utils/file-helper'
+import AppToast from '@/components/AppToast.vue'
 
 const S3_HOST = import.meta.env.VITE_S3_HOST || ''
-
 const router = useRouter()
+const toast = ref({ show: false, message: '' })
+let toastTimeout = null
+
+const showToast = (message) => {
+  toast.value.message = message
+  toast.value.show = true
+  
+  if (toastTimeout) clearTimeout(toastTimeout)
+  toastTimeout = setTimeout(() => {
+    toast.value.show = false
+  }, 4000) 
+}
 
 const filters = ref({
   name: '',
@@ -401,6 +418,7 @@ onMounted(() => {
 
 onUnmounted(() => {
   window.removeEventListener('click', closeAllDropdowns)
+  if (toastTimeout) clearTimeout(toastTimeout)
 })
 
 const formatDateTimeExtended = (dateTimeString) => {
@@ -475,7 +493,7 @@ const baixarAta = async (sessao) => {
     const caminhoArquivo = documentoInfo?.attachment
     
     if (!caminhoArquivo) {
-       alert('Esta sessão ainda não possui o arquivo PDF da Ata anexado.')
+       showToast('Esta sessão não possui o arquivo da Ata vinculado.')
        return
     }
 
@@ -484,7 +502,7 @@ const baixarAta = async (sessao) => {
     
   } catch (error) {
     console.error('Erro ao abrir a Ata:', error)
-    alert('Não foi possível acessar a Ata.')
+    showToast('Não foi possível acessar a Ata no momento.')
   } finally {
     sessao.isCarregandoAta = false
   }
@@ -500,7 +518,7 @@ const baixarPauta = async (sessao, tipo = 'pdf') => {
     const urlDownload = response.data?.data || response.data?.url || response.data
     
     if (!urlDownload || typeof urlDownload !== 'string') {
-       alert(`Esta sessão ainda não possui uma pauta disponível para exportação em ${tipo.toUpperCase()}.`)
+       showToast(`Esta sessão ainda não possui pauta em ${tipo.toUpperCase()}.`)
        return
     }
 
@@ -508,7 +526,7 @@ const baixarPauta = async (sessao, tipo = 'pdf') => {
     
   } catch (error) {
     console.error('Erro ao baixar a Pauta:', error)
-    alert('Não foi possível gerar a Pauta no momento.')
+    showToast('Não foi possível gerar a Pauta no momento.')
   } finally {
     sessao.isExportando = false 
     sessao.isCarregandoPauta = false
