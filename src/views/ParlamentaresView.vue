@@ -1,5 +1,5 @@
 <template>
-  <div class="max-w-7xl mx-auto px-6 py-8">
+  <div class="max-w-7xl mx-auto px-6 py-8 relative">
     <nav class="text-sm mb-6">
       <ol class="flex items-center gap-2 text-gray-600">
         <li><router-link to="/" class="hover:text-brand-blue">Início</router-link></li>
@@ -23,9 +23,69 @@
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">
+          Buscar parlamentar
+        </label>
+        <div class="relative">
+          <input
+            type="text"
+            v-model="searchQuery"
+            placeholder="Digite o nome..."
+            class="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-blue focus:border-transparent pl-10"
+          />
+          <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+        </div>
       </div>
 
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">
+          Legislatura
+        </label>
+        <div class="relative">
+          <select
+            v-model="selectedLegislatura"
+            class="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg appearance-none focus:outline-none focus:ring-2 focus:ring-brand-blue focus:border-transparent"
+          >
+            <option value="">Todas as legislaturas</option>
+            <option v-for="leg in legislaturas" :key="leg.id" :value="leg.id">
+              {{ leg.title }}
+            </option>
+          </select>
+          <svg class="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+          </svg>
+        </div>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">
+          Partido
+        </label>
+        <div class="relative">
+          <select
+            v-model="selectedPartido"
+            class="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg appearance-none focus:outline-none focus:ring-2 focus:ring-brand-blue focus:border-transparent"
+          >
+            <option value="">Todos os partidos</option>
+            <option v-for="partido in partidos" :key="partido.id" :value="partido.id">
+              {{ partido.name_party || partido.sigla }}
+            </option>
+          </select>
+          <svg class="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+          </svg>
+        </div>
+      </div>
+      
+    </div>
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div v-if="parlamentares.length === 0" class="col-span-2 text-center py-12 text-gray-500">
+        Nenhum parlamentar encontrado com os filtros aplicados.
+      </div>
+
       <div
         v-for="parlamentar in parlamentares"
         :key="parlamentar.id"
