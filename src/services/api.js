@@ -45,6 +45,13 @@ export class LegislaturasService {
 
 }
 
+export class MandatosService {
+  async get() {
+    return await api.get('/external/mandates')
+  }
+
+}
+
 export class ParlamentaresService {
   async get(filtros = {}) {
     return await api.get('/external/users', { params: filtros })
@@ -227,6 +234,7 @@ export class AuthService {
 export const materiasService = new MateriasService()
 export const parlamentaresService = new ParlamentaresService()
 export const legislaturasService = new LegislaturasService()
+export const mandatosService = new MandatosService()
 export const partidosService = new PartidosService()
 export const sessoesService = new SessoesService()
 export const comissoesService = new ComissoesService()
@@ -239,6 +247,7 @@ export default {
   materias: materiasService,
   parlamentares: parlamentaresService,
   legislaturas: legislaturasService,
+  mandatos: mandatosService,
   partidos: partidosService,
   sessoes: sessoesService,
   comissoes: comissoesService,

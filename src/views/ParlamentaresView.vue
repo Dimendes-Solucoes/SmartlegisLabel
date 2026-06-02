@@ -125,7 +125,7 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { parlamentaresService, partidosService, legislaturasService } from '@/services/api'
+import { parlamentaresService, partidosService, mandatosService } from '@/services/api'
 import { getAvatarUrl } from '@/utils/image-url'
 
 const router = useRouter()
@@ -183,7 +183,7 @@ onMounted(() => {
 
 const getLegislaturas = async () => {
   try {
-    const response = await legislaturasService.get()
+    const response = await mandatosService.get()
 
     const dataList =
       response.data?.data ||
