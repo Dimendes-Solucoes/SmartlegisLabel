@@ -124,7 +124,7 @@
 
       <div v-if="activeTab === 'mandatos'">
         <h3 class="text-lg font-semibold text-gray-900 mb-4">Mandatos</h3>
-        <div v-if="parlamentar.legislatures && parlamentar.legislatures.length > 0" class="overflow-x-auto">
+        <div v-if="parlamentar.mandates && parlamentar.mandates.length > 0" class="overflow-x-auto">
           <table class="min-w-full">
             <thead class="bg-gray-100">
               <tr>
@@ -149,7 +149,7 @@
               </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
-              <tr v-for="legislatura in parlamentar.legislatures" :key="legislatura.id">
+              <tr v-for="legislatura in parlamentar.mandates" :key="legislatura.id">
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                   {{ legislatura.title || '-' }}
                 </td>
@@ -538,11 +538,11 @@ const tabs = [
 ]
 
 const mandatoAtual = computed(() => {
-  if (!parlamentar.value?.legislatures || parlamentar.value.legislatures.length === 0) {
+  if (!parlamentar.value?.mandates || parlamentar.value.mandates.length === 0) {
     return 'Não informado'
   }
 
-  const atual = parlamentar.value.legislatures[0]
+  const atual = parlamentar.value.mandates[0]
   return atual.title || 'Não informado'
 })
 
