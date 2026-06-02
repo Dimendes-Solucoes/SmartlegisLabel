@@ -40,7 +40,7 @@
             :key="leg.id"
             :value="leg.id"
           >
-            {{ leg.title }} {{ leg.is_current ? '- Atual' : '' }}
+            Biênio {{ leg.start_at?.slice(0, 4) }}-{{ leg.end_at?.slice(0, 4) }} {{ leg.is_current ? '- Atual' : '' }}
           </option>
         </select>
         <svg class="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">

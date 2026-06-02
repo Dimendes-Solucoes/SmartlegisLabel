@@ -47,12 +47,11 @@
         </label>
         <div class="relative">
           <select
-            v-model="selectedLegislatura"
+            v-model="selectedMandate"
             class="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg appearance-none focus:outline-none focus:ring-2 focus:ring-brand-blue focus:border-transparent"
           >
-            <option value="">Todas as legislaturas</option>
-            <option v-for="leg in legislaturas" :key="leg.id" :value="leg.id">
-              {{ leg.title }}
+            <option v-for="leg in legislaturas" :key="leg.id" :value="leg.start_at?.slice(0, 4)">
+              Legislatura {{ leg.start_at?.slice(0, 4) }}-{{ leg.end_at?.slice(0, 4) }}
             </option>
           </select>
           <svg class="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -106,15 +105,15 @@
             {{ parlamentar.nickname }}
           </h3>
           <span class="px-3 py-1 text-xs font-medium rounded-full inline-block" style="background-color: rgba(0, 122, 184, 0.15); color: #007AB8;">
-            {{ parlamentar?.category_party?.name_party || 'Partido não informado' }}
+            {{ getParty(parlamentar)?.name_party || 'Partido não informado' }}
           </span>
         </div>
 
         <div class="flex-shrink-0">
           <img
-            v-if="parlamentar?.category_party?.logo"
-            :src="getAvatarUrl(parlamentar.category_party.logo)"
-            :alt="`Logo ${parlamentar.category_party?.name_party}`"
+            v-if="getParty(parlamentar)?.logo"
+            :src="getAvatarUrl(getParty(parlamentar).logo)"
+            :alt="`Logo ${getParty(parlamentar)?.name_party}`"
             class="h-12 object-contain"
           />
         </div>
@@ -132,7 +131,7 @@ import { getAvatarUrl } from '@/utils/image-url'
 const router = useRouter()
 
 const searchQuery = ref('')
-const selectedLegislatura = ref('')
+const selectedMandate = ref('')
 const selectedPartido = ref('')
 
 const todosParlamentares = ref([])
@@ -140,17 +139,39 @@ const partidos = ref([])
 const legislaturas = ref([])
 
 const parlamentares = computed(() => {
-  let resultado = todosParlamentares.value
+  let resultado = [...todosParlamentares.value]
+
   if (searchQuery.value) {
     const query = searchQuery.value.toLowerCase()
-    resultado = resultado.filter(p => p.nickname?.toLowerCase().includes(query))
+
+    resultado = resultado.filter(parlamentar =>
+      parlamentar.nickname?.toLowerCase().includes(query) ||
+      parlamentar.name?.toLowerCase().includes(query)
+    )
   }
-  if (selectedLegislatura.value) {
-    resultado = resultado.filter(p => p.legislatures?.some(leg => leg.id === parseInt(selectedLegislatura.value)))
+
+  if (selectedMandate.value) {
+    resultado = resultado.filter(parlamentar =>
+      parlamentar.terms?.some(term => {
+        const matchMandate =
+          term.mandate?.start_at?.slice(0, 4) === selectedMandate.value
+
+        const matchParty =
+          !selectedPartido.value ||
+          term.category_party?.id === Number(selectedPartido.value)
+
+        return matchMandate && matchParty
+      })
+    )
+  } else if (selectedPartido.value) {
+    resultado = resultado.filter(parlamentar =>
+      parlamentar.terms?.some(
+        term =>
+          term.category_party?.id === Number(selectedPartido.value)
+      )
+    )
   }
-  if (selectedPartido.value) {
-    resultado = resultado.filter(p => p.category_party?.id === parseInt(selectedPartido.value))
-  }
+
   return resultado
 })
 
@@ -163,7 +184,22 @@ onMounted(() => {
 const getLegislaturas = async () => {
   try {
     const response = await legislaturasService.get()
-    legislaturas.value = response.data
+
+    const dataList =
+      response.data?.data ||
+      response.data ||
+      []
+
+    legislaturas.value = dataList
+
+    const atual =
+      dataList.find(leg => leg.is_current) ??
+      dataList[dataList.length - 1]
+
+    if (atual) {
+      selectedMandate.value =
+        atual.start_at?.slice(0, 4)
+    }
   } catch (error) {
     console.error('Erro ao buscar legislaturas:', error)
   }
@@ -181,13 +217,45 @@ const getPartidos = async () => {
 const getParlamentares = async () => {
   try {
     const response = await parlamentaresService.get()
-    todosParlamentares.value = response.users.filter(user => user.status_user === 1)
+
+    todosParlamentares.value = response.users.filter(
+      user =>
+        user.user_category_id == 2 ||
+        user.user_category_id == 3
+    )
   } catch (error) {
     console.error('Erro ao buscar parlamentares:', error)
   }
 }
 
+const getParty = (parlamentar) => {
+  if (selectedMandate.value) {
+    const term = parlamentar.terms?.find(
+      term =>
+        term.mandate?.start_at?.slice(0, 4) ===
+        selectedMandate.value
+    )
+
+    if (term?.category_party) {
+      return term.category_party
+    }
+  }
+
+  const currentTerm = parlamentar.terms?.find(
+    term => term.mandate?.is_current
+  )
+
+  if (currentTerm?.category_party) {
+    return currentTerm.category_party
+  }
+
+  return parlamentar.category_party
+}
+
 const goToParlamentar = (id) => {
-  router.push({ name: 'parlamentar-detalhe', params: { id } })
+  router.push({
+    name: 'parlamentar-detalhe',
+    params: { id }
+  })
 }
 </script>
